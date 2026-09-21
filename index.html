@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>Forge Mind</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Fraunces:wght@500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --bg: #F3F1F7;
+    --bg-raised: #FFFFFF;
+    --ink: #201B2E;
+    --ink-soft: #6B6480;
+    --ink-faint: #A29CB8;
+    --line: #E3DFEC;
+    --brand: #4B3B78;
+    --brand-soft: #EAE4F5;
+    --accent: #2F8F86;
+    --warn: #B3401F;
+    --shadow: 0 1px 2px rgba(20,20,15,0.06), 0 6px 20px rgba(20,20,15,0.05);
+    --radius-lg: 22px;
+    --radius-md: 14px;
+    --radius-sm: 9px;
+    --font-display: 'Fraunces', Georgia, serif;
+    --font-body: 'Manrope', system-ui, -apple-system, sans-serif;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #17141F;
+      --bg-raised: #211D2C;
+      --ink: #ECE9F2;
+      --ink-soft: #ACA6C0;
+      --ink-faint: #6C6680;
+      --line: #2E2A3A;
+      --brand: #B4A2E8;
+      --brand-soft: #2B2540;
+      --accent: #5FC2B6;
+      --warn: #E68A5C;
+      --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 6px 20px rgba(0,0,0,0.28);
+      color-scheme: dark;
+    }
+  }
+
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-body);
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    -webkit-tap-highlight-color: transparent;
+  }
+  h1, h2, h3, .display { font-family: var(--font-display); }
+  button { font-family: inherit; }
+  ::-webkit-scrollbar { display: none; }
+
+  .app { max-width: 520px; margin: 0 auto; min-height: 100%; display: flex; flex-direction: column; }
+
+  header.topbar {
+    position: sticky; top: 0; z-index: 20;
+    padding: calc(env(safe-area-inset-top,0px) + 18px) 20px 14px;
+    margin-top: calc(env(safe-area-inset-top,0px) * -1);
+    background: linear-gradient(180deg, var(--bg) 70%, transparent);
+    display: flex; align-items: flex-start; justify-content: space-between;
+  }
+  header.topbar .brandwrap { display:flex; flex-direction:column; }
+  header.topbar .brand { font-family: var(--font-display); font-weight: 600; font-size: 21px; letter-spacing: -0.01em; }
+  header.topbar .subline { font-size: 13px; color: var(--ink-soft); margin-top:2px; }
+  .gear-btn { background: var(--bg-raised); border: 1px solid var(--line); box-shadow: var(--shadow); width:38px; height:38px; border-radius: 50%; display:flex; align-items:center; justify-content:center; font-size:16px; color: var(--ink-soft); cursor:pointer; }
+
+  main { flex: 1; padding: 0 20px 100px; overflow-x: hidden; }
+  .screen { display: none; }
+  .screen.active { display: block; animation: fadein .18s ease; }
+  @keyframes fadein { from { opacity:0; transform: translateY(4px);} to {opacity:1; transform: none;} }
+
+  .section-head { display:flex; align-items:baseline; justify-content:space-between; margin: 26px 0 10px; }
+  .section-head h2 { font-size: 17px; margin:0; font-weight:600; }
+  .section-head .hint { font-size: 12px; color: var(--ink-faint); }
+
+  .card { background: var(--bg-raised); border-radius: var(--radius-md); padding: 14px 16px; box-shadow: var(--shadow); }
+
+  .empty-state { text-align:center; padding: 34px 10px; color: var(--ink-faint); }
+  .empty-state .emoji { font-size: 30px; margin-bottom:8px; }
+  .empty-state p { font-size: 13.5px; margin: 4px 0; }
+
+  .btn { border:none; border-radius: 999px; padding: 13px 20px; font-size: 14.5px; font-weight:700; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; gap:8px; }
+  .btn.primary { background: var(--brand); color:#fff; width:100%; }
+  @media (prefers-color-scheme: dark) { .btn.primary { color:#17141F; } }
+  .btn.ghost { background:transparent; color: var(--brand); border: 1.5px solid var(--line); width:100%; }
+  .btn.text { background:none; color: var(--ink-soft); padding: 8px 4px; font-weight:600; text-decoration: underline; text-underline-offset:3px; }
+  .btn.danger-text { background:none; color: var(--warn); font-weight:700; text-decoration:underline; padding:8px 4px; }
+  .chip-row { display:flex; gap:8px; flex-wrap:wrap; margin-top:12px; }
+  .chip-btn { background: var(--brand-soft); color: var(--brand); border:none; border-radius: 999px; padding:9px 14px; font-size:13.5px; font-weight:700; cursor:pointer; }
+
+  .field { display:flex; flex-direction:column; gap:4px; flex:1; min-width: 70px; }
+  .field label { font-size: 10.5px; color: var(--ink-faint); font-weight:700; }
+  input[type=text], input[type=number] {
+    border: 1.5px solid var(--line); border-radius: var(--radius-sm); padding: 9px 10px;
+    font-size: 14px; font-family: inherit; background: var(--bg); color: var(--ink); width:100%;
+  }
+  input[type=text]:focus, input[type=number]:focus { outline:none; border-color: var(--brand); }
+
+  nav.tabbar {
+    position: fixed; left:0; right:0; bottom:0; z-index: 30;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    background: var(--bg-raised); border-top: 1px solid var(--line);
+  }
+  .tabbar-inner { max-width:520px; margin:0 auto; display:flex; }
+  .tab { flex:1; border:none; background:none; padding: 11px 4px 9px; display:flex; flex-direction:column; align-items:center; gap:3px; color: var(--ink-faint); cursor:pointer; }
+  .tab.active { color: var(--brand); }
+  .tab .ic { font-size: 19px; }
+  .tab .lb { font-size: 10.5px; font-weight:700; }
+
+  .modal-scrim { position:fixed; inset:0; background: rgba(15,17,12,0.45); z-index:50; display:none; align-items:flex-end; }
+  .modal-scrim.open { display:flex; }
+  .modal-sheet { background: var(--bg); width:100%; max-width:520px; margin:0 auto; border-radius: 22px 22px 0 0; padding: 20px 20px calc(env(safe-area-inset-bottom,0px) + 24px); max-height: 86vh; overflow-y:auto; }
+  .modal-sheet h3 { margin: 0 0 14px; font-size:17px; }
+  .modal-head { display:flex; justify-content:space-between; align-items:center; }
+  .close-x { background:none; border:none; font-size:20px; color: var(--ink-faint); cursor:pointer; }
+
+  .toast { position: fixed; left:50%; transform: translateX(-50%); bottom: calc(env(safe-area-inset-bottom,0px) + 84px); background: var(--ink); color: var(--bg); font-size:13px; padding:10px 18px; border-radius:999px; z-index:60; opacity:0; pointer-events:none; transition: opacity .25s, bottom .25s; }
+  .toast.show { opacity:1; bottom: calc(env(safe-area-inset-bottom,0px) + 100px); }
+
+  /* ===================== FORGE MIND — app-specific ===================== */
+  .overall-card { background: linear-gradient(135deg, var(--brand), var(--accent)); color:#fff; border-radius: var(--radius-lg); padding: 18px 20px; box-shadow: var(--shadow); }
+  .overall-top { display:flex; justify-content:space-between; align-items:baseline; }
+  .overall-top .pct { font-family: var(--font-display); font-size: 30px; font-weight:600; }
+  .overall-top .streak { font-size: 13px; font-weight:700; background: rgba(255,255,255,0.18); padding:5px 10px; border-radius:999px; }
+  .overall-bar-track { height:8px; background: rgba(255,255,255,0.25); border-radius:999px; margin-top:12px; overflow:hidden; }
+  .overall-bar-fill { height:100%; background:#fff; border-radius:999px; transition: width .3s ease; }
+  .overall-sub { font-size:12px; opacity:0.85; margin-top:8px; }
+
+  .cat-list { display:flex; flex-direction:column; gap:10px; margin-top:12px; }
+  .cat-card { background: var(--bg-raised); border-radius: var(--radius-md); padding: 13px 14px; box-shadow: var(--shadow); display:flex; align-items:center; gap:12px; cursor:pointer; border:none; text-align:left; width:100%; }
+  .cat-emoji { font-size: 22px; width:32px; text-align:center; flex-shrink:0; }
+  .cat-body { flex:1; min-width:0; }
+  .cat-top { display:flex; justify-content:space-between; font-size:13.5px; font-weight:700; }
+  .cat-top .cat-amt { color: var(--ink-soft); font-weight:600; font-variant-numeric: tabular-nums; }
+  .cat-bar-track { height:6px; background: var(--brand-soft); border-radius:999px; margin-top:7px; overflow:hidden; }
+  .cat-bar-fill { height:100%; background: var(--brand); border-radius:999px; }
+  .cat-bar-fill.done { background: var(--accent); }
+  .cat-plus { font-size: 20px; color: var(--ink-faint); flex-shrink:0; }
+
+  .week-card { background: var(--bg-raised); border-radius: var(--radius-md); padding: 14px 16px; box-shadow: var(--shadow); margin-bottom:10px; }
+  .week-head { display:flex; justify-content:space-between; align-items:baseline; }
+  .week-head .range { font-weight:700; font-size:14px; }
+  .week-head .pct { font-size:13px; font-weight:700; color: var(--brand); }
+  .week-bar-track { height:6px; background: var(--brand-soft); border-radius:999px; margin-top:8px; overflow:hidden; }
+  .week-bar-fill { height:100%; background: var(--brand); border-radius:999px; }
+  .week-mini { display:flex; flex-wrap:wrap; gap:6px 12px; margin-top:9px; font-size:11.5px; color: var(--ink-soft); }
+
+  .qty-row { display:flex; gap:8px; margin-top:12px; }
+  .qty-row input { text-align:center; }
+  .target-row { display:flex; align-items:center; gap:10px; padding: 10px 0; border-bottom: 1px solid var(--line); }
+  .target-row:last-child { border-bottom:none; }
+  .target-row .te { font-size:18px; width:26px; text-align:center; }
+  .target-row .tl { flex:1; font-size:14px; font-weight:600; }
+  .target-row input { width: 72px; text-align:center; }
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <div class="brandwrap">
+      <span class="brand">FORGE MIND</span>
+      <span class="subline" id="topSubline"></span>
+    </div>
+    <button class="gear-btn" id="openSettings">⚙</button>
+  </header>
+
+  <main>
+    <section class="screen active" id="screen-home">
+      <div class="overall-card">
+        <div class="overall-top">
+          <span class="pct" id="overallPct">0%</span>
+          <span class="streak" id="streakBadge">🔥 0 wk</span>
+        </div>
+        <div class="overall-bar-track"><div class="overall-bar-fill" id="overallBar" style="width:0%"></div></div>
+        <div class="overall-sub" id="overallSub">This week's progress</div>
+      </div>
+
+      <div class="section-head"><h2>Weekly Progress</h2><span class="hint">tap to log</span></div>
+      <div class="cat-list" id="catList"></div>
+    </section>
+
+    <section class="screen" id="screen-history">
+      <div class="section-head"><h2>History</h2></div>
+      <div id="historyList"></div>
+    </section>
+  </main>
+
+  <nav class="tabbar">
+    <div class="tabbar-inner">
+      <button class="tab active" data-screen="home"><span class="ic">◉</span><span class="lb">Home</span></button>
+      <button class="tab" data-screen="history"><span class="ic">▤</span><span class="lb">History</span></button>
+    </div>
+  </nav>
+</div>
+
+<div class="modal-scrim" id="genericModalScrim">
+  <div class="modal-sheet">
+    <div class="modal-head"><h3 id="genericModalTitle">Edit</h3><button class="close-x" id="genericModalClose">✕</button></div>
+    <div id="genericModalBody"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function () {
+  /* ============================================================
+     SHARED HELPERS — identical across every app in the ecosystem.
+     ============================================================ */
+  const APP_PREFIX = 'forgemind_';
+
+  const $ = (id) => document.getElementById(id);
+  const escapeHtml = (s) => String(s || '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+  let toastTimer;
+  function toast(msg) {
+    const t = $('toast'); t.textContent = msg; t.classList.add('show');
+    clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
+  }
+
+  const store = {
+    get(key, fallback) {
+      try { const v = localStorage.getItem(APP_PREFIX + key); return v ? JSON.parse(v) : fallback; }
+      catch (e) { return fallback; }
+    },
+    set(key, val) {
+      try { localStorage.setItem(APP_PREFIX + key, JSON.stringify(val)); }
+      catch (e) { console.error('Storage failed', e); toast('Could not save — storage may be full'); }
+    }
+  };
+
+  let onScreenEnter = null;
+  function switchScreen(name) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    $('screen-' + name).classList.add('active');
+    document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.screen === name));
+    if (typeof onScreenEnter === 'function') onScreenEnter(name);
+    window.scrollTo(0, 0);
+  }
+  document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => switchScreen(t.dataset.screen)));
+
+  function openModal(title, bodyHtml, wireFn) {
+    $('genericModalTitle').textContent = title;
+    $('genericModalBody').innerHTML = bodyHtml;
+    $('genericModalScrim').classList.add('open');
+    if (typeof wireFn === 'function') wireFn();
+  }
+  function closeModal() { $('genericModalScrim').classList.remove('open'); }
+  $('genericModalClose').addEventListener('click', closeModal);
+  $('genericModalScrim').addEventListener('click', (e) => { if (e.target === $('genericModalScrim')) closeModal(); });
+
+  /* ============================================================
+     FORGE MIND — app-specific code
+     ============================================================ */
+
+  const CATEGORIES = [
+    { key: 'reading',    label: 'Reading',        emoji: '📖' },
+    { key: 'learning',   label: 'Learning',        emoji: '🧠' },
+    { key: 'focus',      label: 'Focus Training',  emoji: '🎯' },
+    { key: 'meditation', label: 'Meditation',      emoji: '🧘' },
+    { key: 'breathing',  label: 'Breathing',       emoji: '🌬️' },
+    { key: 'braingames', label: 'Brain Games',     emoji: '🧩' }
+  ];
+
+  const DEFAULT_TARGETS = { reading: 180, learning: 120, focus: 60, meditation: 60, breathing: 30, braingames: 30 };
+
+  function getTargets() { return store.get('targets', DEFAULT_TARGETS); }
+  function getWeeks() { return store.get('weeks', {}); }
+
+  function getWeekKey(d) {
+    const date = new Date(d);
+    const day = (date.getDay() + 6) % 7; // 0 = Monday
+    date.setDate(date.getDate() - day);
+    date.setHours(0, 0, 0, 0);
+    return date.toISOString().slice(0, 10);
+  }
+  function currentWeekKey() { return getWeekKey(new Date()); }
+
+  function formatMins(m) {
+    m = Math.round(m || 0);
+    if (m < 60) return m + 'm';
+    const h = Math.floor(m / 60), r = m % 60;
+    return r ? `${h}h ${r}m` : `${h}h`;
+  }
+
+  function weekRangeLabel(weekKey) {
+    const start = new Date(weekKey + 'T00:00:00');
+    const end = new Date(start); end.setDate(end.getDate() + 6);
+    const opts = { month: 'short', day: 'numeric' };
+    return `${start.toLocaleDateString(undefined, opts)} – ${end.toLocaleDateString(undefined, opts)}`;
+  }
+
+  function addTime(catKey, minutes) {
+    const weeks = getWeeks();
+    const key = currentWeekKey();
+    if (!weeks[key]) weeks[key] = {};
+    weeks[key][catKey] = (weeks[key][catKey] || 0) + minutes;
+    store.set('weeks', weeks);
+    const cat = CATEGORIES.find(c => c.key === catKey);
+    toast(`+${formatMins(minutes)} ${cat.label}`);
+    renderHome();
+  }
+
+  function computeStreak() {
+    const weeks = getWeeks();
+    const targets = getTargets();
+    const totalTarget = Object.values(targets).reduce((a, b) => a + b, 0);
+    if (totalTarget <= 0) return 0;
+    let streak = 0;
+    let cursor = new Date();
+    while (true) {
+      const key = getWeekKey(cursor);
+      const wd = weeks[key] || {};
+      const total = Object.values(wd).reduce((a, b) => a + b, 0);
+      if (total >= totalTarget) { streak++; cursor.setDate(cursor.getDate() - 7); }
+      else break;
+    }
+    return streak;
+  }
+
+  function renderHome() {
+    const targets = getTargets();
+    const weeks = getWeeks();
+    const wd = weeks[currentWeekKey()] || {};
+
+    let totalLogged = 0, totalTarget = 0;
+    const listHtml = CATEGORIES.map(cat => {
+      const logged = wd[cat.key] || 0;
+      const target = targets[cat.key] || 0;
+      totalLogged += logged; totalTarget += target;
+      const pct = target > 0 ? Math.min(100, Math.round((logged / target) * 100)) : 0;
+      const done = pct >= 100;
+      return `
+        <button class="cat-card" data-log="${cat.key}">
+          <span class="cat-emoji">${cat.emoji}</span>
+          <span class="cat-body">
+            <span class="cat-top"><span>${escapeHtml(cat.label)}</span><span class="cat-amt">${formatMins(logged)} / ${formatMins(target)}</span></span>
+            <span class="cat-bar-track"><span class="cat-bar-fill${done ? ' done' : ''}" style="width:${pct}%"></span></span>
+          </span>
+          <span class="cat-plus">${done ? '✓' : '+'}</span>
+        </button>`;
+    }).join('');
+    $('catList').innerHTML = listHtml;
+
+    const overallPct = totalTarget > 0 ? Math.min(100, Math.round((totalLogged / totalTarget) * 100)) : 0;
+    $('overallPct').textContent = overallPct + '%';
+    $('overallBar').style.width = overallPct + '%';
+    $('overallSub').textContent = `${formatMins(totalLogged)} of ${formatMins(totalTarget)} this week`;
+    $('streakBadge').textContent = `🔥 ${computeStreak()} wk`;
+
+    document.querySelectorAll('[data-log]').forEach(btn => {
+      btn.addEventListener('click', () => openLogModal(btn.dataset.log));
+    });
+  }
+
+  function openLogModal(catKey) {
+    const cat = CATEGORIES.find(c => c.key === catKey);
+    const body = `
+      <p style="margin:0 0 4px;color:var(--ink-soft);font-size:13.5px;">Log time for ${escapeHtml(cat.label)}</p>
+      <div class="chip-row">
+        <button class="chip-btn" data-mins="15">+15m</button>
+        <button class="chip-btn" data-mins="30">+30m</button>
+        <button class="chip-btn" data-mins="60">+1h</button>
+      </div>
+      <div class="qty-row">
+        <div class="field"><label>CUSTOM MINUTES</label><input type="number" id="customMins" min="1" placeholder="e.g. 20"></div>
+        <button class="btn primary" style="width:auto;align-self:flex-end;" id="customAdd">Add</button>
+      </div>`;
+    openModal(cat.label, body, () => {
+      document.querySelectorAll('[data-mins]').forEach(b => {
+        b.addEventListener('click', () => { addTime(catKey, parseInt(b.dataset.mins, 10)); closeModal(); });
+      });
+      $('customAdd').addEventListener('click', () => {
+        const v = parseInt($('customMins').value, 10);
+        if (v > 0) { addTime(catKey, v); closeModal(); }
+      });
+    });
+  }
+
+  function openSettingsModal() {
+    const targets = getTargets();
+    const rows = CATEGORIES.map(cat => `
+      <div class="target-row">
+        <span class="te">${cat.emoji}</span>
+        <span class="tl">${escapeHtml(cat.label)}</span>
+        <input type="number" min="0" id="target_${cat.key}" value="${targets[cat.key] || 0}">
+        <span style="font-size:11.5px;color:var(--ink-faint);">min/wk</span>
+      </div>`).join('');
+    const body = `
+      <div>${rows}</div>
+      <button class="btn primary" id="saveTargets" style="margin-top:16px;">Save Targets</button>`;
+    openModal('Weekly Targets', body, () => {
+      $('saveTargets').addEventListener('click', () => {
+        const newTargets = {};
+        CATEGORIES.forEach(cat => {
+          const v = parseInt($('target_' + cat.key).value, 10);
+          newTargets[cat.key] = isNaN(v) || v < 0 ? 0 : v;
+        });
+        store.set('targets', newTargets);
+        closeModal();
+        toast('Targets updated');
+        renderHome();
+      });
+    });
+  }
+  $('openSettings').addEventListener('click', openSettingsModal);
+
+  function renderHistory() {
+    const weeks = getWeeks();
+    const targets = getTargets();
+    const totalTarget = Object.values(targets).reduce((a, b) => a + b, 0);
+    const keys = Object.keys(weeks).filter(k => k !== currentWeekKey()).sort().reverse();
+
+    if (keys.length === 0) {
+      $('historyList').innerHTML = `<div class="empty-state"><div class="emoji">🧩</div><p>No past weeks yet.</p><p>Finish this week to start your history.</p></div>`;
+      return;
+    }
+
+    $('historyList').innerHTML = keys.map(key => {
+      const wd = weeks[key];
+      const total = Object.values(wd).reduce((a, b) => a + b, 0);
+      const pct = totalTarget > 0 ? Math.min(100, Math.round((total / totalTarget) * 100)) : 0;
+      const mini = CATEGORIES.map(cat => `${cat.emoji} ${formatMins(wd[cat.key] || 0)}`).join('&nbsp;&nbsp;');
+      return `
+        <div class="week-card">
+          <div class="week-head"><span class="range">${weekRangeLabel(key)}</span><span class="pct">${pct}%</span></div>
+          <div class="week-bar-track"><div class="week-bar-fill" style="width:${pct}%"></div></div>
+          <div class="week-mini">${mini}</div>
+        </div>`;
+    }).join('');
+  }
+
+  function boot() {
+    if (!store.get('targets', null)) store.set('targets', DEFAULT_TARGETS);
+    $('topSubline').textContent = new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' });
+    onScreenEnter = (name) => { if (name === 'history') renderHistory(); };
+    renderHome();
+  }
+
+  boot();
+})();
+</script>
+</body>
+</html>
