@@ -3,66 +3,52 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
-<title>Forge Mind</title>
+<title>Mind</title>
+<meta name="theme-color" content="#0A0A0B">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Mind">
 <link rel="manifest" href="./manifest.json">
 <link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png">
-<link rel="icon" type="image/png" sizes="512x512" href="./icon-512.png">
 <link rel="apple-touch-icon" href="./icon-192.png">
-<meta name="theme-color" content="#17141F">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Fraunces:wght@500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
 <style>
+  /* Forge palette: shared dark look across the app ecosystem (same as Forge & Fuel). */
   :root {
-    --bg: #F3F1F7;
-    --bg-raised: #FFFFFF;
-    --ink: #201B2E;
-    --ink-soft: #6B6480;
-    --ink-faint: #A29CB8;
-    --line: #E3DFEC;
-    --brand: #4B3B78;
-    --brand-soft: #EAE4F5;
-    --accent: #2F8F86;
-    --warn: #B3401F;
-    --shadow: 0 1px 2px rgba(20,20,15,0.06), 0 6px 20px rgba(20,20,15,0.05);
-    --radius-lg: 22px;
+    --bg: #0A0A0B;
+    --bg-raised: #141416;
+    --surface2: #1D1E21;
+    --ink: #F5F5F6;
+    --ink-soft: #8C8D92;
+    --ink-faint: #4E5054;
+    --line: #26272B;
+    --brand: #FF4A16;
+    --brand-ink: #120B07;
+    --brand-soft: rgba(255,74,22,0.12);
+    --accent: #F0B429;
+    --warn: #E5484D;
+    --radius-lg: 16px;
     --radius-md: 14px;
-    --radius-sm: 9px;
-    --font-display: 'Fraunces', Georgia, serif;
-    --font-body: 'Manrope', system-ui, -apple-system, sans-serif;
-    color-scheme: light;
-  }
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --bg: #17141F;
-      --bg-raised: #211D2C;
-      --ink: #ECE9F2;
-      --ink-soft: #ACA6C0;
-      --ink-faint: #6C6680;
-      --line: #2E2A3A;
-      --brand: #B4A2E8;
-      --brand-soft: #2B2540;
-      --accent: #5FC2B6;
-      --warn: #E68A5C;
-      --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 6px 20px rgba(0,0,0,0.28);
-      color-scheme: dark;
-    }
+    --radius-sm: 10px;
+    --font-display: 'Anton', 'Arial Narrow', 'Haettenschweiler', sans-serif;
+    --font-body: 'Archivo', -apple-system, BlinkMacSystemFont, sans-serif;
+    color-scheme: dark;
   }
 
+  /* ===================== STRUCTURAL (shared template) ===================== */
   * { box-sizing: border-box; }
   html, body { height: 100%; }
   body {
-    margin: 0;
-    background: var(--bg);
-    color: var(--ink);
-    font-family: var(--font-body);
-    padding-top: env(safe-area-inset-top, 0px);
-    padding-bottom: env(safe-area-inset-bottom, 0px);
+    margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font-body);
+    padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px);
     -webkit-tap-highlight-color: transparent;
   }
-  h1, h2, h3, .display { font-family: var(--font-display); }
+  h1, h2, h3 { font-family: var(--font-display); font-weight: 400; }
   button { font-family: inherit; }
   ::-webkit-scrollbar { display: none; }
 
@@ -70,15 +56,15 @@
 
   header.topbar {
     position: sticky; top: 0; z-index: 20;
-    padding: calc(env(safe-area-inset-top,0px) + 18px) 20px 14px;
+    padding: calc(env(safe-area-inset-top,0px) + 18px) 20px 12px;
     margin-top: calc(env(safe-area-inset-top,0px) * -1);
-    background: linear-gradient(180deg, var(--bg) 70%, transparent);
-    display: flex; align-items: flex-start; justify-content: space-between;
+    margin-bottom: 14px;
+    background: var(--bg); border-bottom: 2px solid var(--brand);
+    display: flex; align-items: center; justify-content: space-between;
   }
-  header.topbar .brandwrap { display:flex; flex-direction:column; }
-  header.topbar .brand { font-family: var(--font-display); font-weight: 600; font-size: 21px; letter-spacing: -0.01em; }
-  header.topbar .subline { font-size: 13px; color: var(--ink-soft); margin-top:2px; }
-  .gear-btn { background: var(--bg-raised); border: 1px solid var(--line); box-shadow: var(--shadow); width:38px; height:38px; border-radius: 50%; display:flex; align-items:center; justify-content:center; font-size:16px; color: var(--ink-soft); cursor:pointer; }
+  header.topbar .brand { display:flex; align-items:center; gap:9px; font-family: var(--font-display); font-size: 20px; letter-spacing: 0.22em; text-transform: uppercase; }
+  header.topbar .brand svg { width: 26px; height: 26px; flex-shrink: 0; }
+  header.topbar .subline { font-size: 12px; font-weight: 700; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
 
   main { flex: 1; padding: 0 20px 100px; overflow-x: hidden; }
   .screen { display: none; }
@@ -86,125 +72,184 @@
   @keyframes fadein { from { opacity:0; transform: translateY(4px);} to {opacity:1; transform: none;} }
 
   .section-head { display:flex; align-items:baseline; justify-content:space-between; margin: 26px 0 10px; }
-  .section-head h2 { font-size: 17px; margin:0; font-weight:600; }
+  .section-head h2 { font-size: 15px; margin:0; text-transform: uppercase; letter-spacing: 0.05em; }
   .section-head .hint { font-size: 12px; color: var(--ink-faint); }
 
-  .card { background: var(--bg-raised); border-radius: var(--radius-md); padding: 14px 16px; box-shadow: var(--shadow); }
+  .card { background: var(--bg-raised); border: 1px solid var(--line); border-radius: var(--radius-md); padding: 14px 16px; }
 
-  .empty-state { text-align:center; padding: 34px 10px; color: var(--ink-faint); }
+  .empty-state { text-align:center; padding: 34px 10px; color: var(--ink-soft); }
   .empty-state .emoji { font-size: 30px; margin-bottom:8px; }
   .empty-state p { font-size: 13.5px; margin: 4px 0; }
 
-  .btn { border:none; border-radius: 999px; padding: 13px 20px; font-size: 14.5px; font-weight:700; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; gap:8px; }
-  .btn.primary { background: var(--brand); color:#fff; width:100%; }
-  @media (prefers-color-scheme: dark) { .btn.primary { color:#17141F; } }
-  .btn.ghost { background:transparent; color: var(--brand); border: 1.5px solid var(--line); width:100%; }
-  .btn.text { background:none; color: var(--ink-soft); padding: 8px 4px; font-weight:600; text-decoration: underline; text-underline-offset:3px; }
+  .btn { border:none; border-radius: 14px; padding: 13px 20px; font-size: 14.5px; font-weight:700; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; gap:8px; }
+  .btn.primary { background: var(--brand); color: var(--brand-ink); width:100%; font-family: var(--font-display); font-weight: 400; font-size: 16px; letter-spacing: 0.09em; text-transform: uppercase; }
+  .btn.ghost { background: var(--surface2); border: 1px solid var(--line); color: var(--ink); width:100%; }
   .btn.danger-text { background:none; color: var(--warn); font-weight:700; text-decoration:underline; padding:8px 4px; }
-  .chip-row { display:flex; gap:8px; flex-wrap:wrap; margin-top:12px; }
-  .chip-btn { background: var(--brand-soft); color: var(--brand); border:none; border-radius: 999px; padding:9px 14px; font-size:13.5px; font-weight:700; cursor:pointer; }
+  .btn:active { transform: scale(0.98); }
 
-  .field { display:flex; flex-direction:column; gap:4px; flex:1; min-width: 70px; }
-  .field label { font-size: 10.5px; color: var(--ink-faint); font-weight:700; }
-  input[type=text], input[type=number] {
-    border: 1.5px solid var(--line); border-radius: var(--radius-sm); padding: 9px 10px;
-    font-size: 14px; font-family: inherit; background: var(--bg); color: var(--ink); width:100%;
+  .field { display:flex; flex-direction:column; gap:4px; flex:1; min-width: 70px; margin-top: 12px; }
+  .field label { font-size: 10.5px; color: var(--ink-faint); font-weight:700; text-transform: uppercase; letter-spacing: 0.05em; }
+  input[type=text], input[type=number], textarea {
+    background: var(--surface2); border: 1px solid var(--line); border-radius: 10px; padding: 10px 11px;
+    font-size: 15px; font-family: inherit; color: var(--ink); width:100%;
   }
-  input[type=text]:focus, input[type=number]:focus { outline:none; border-color: var(--brand); }
+  textarea { resize: vertical; min-height: 70px; }
+  input:focus, textarea:focus { outline: 2px solid var(--brand); outline-offset: -1px; }
 
-  nav.tabbar {
-    position: fixed; left:0; right:0; bottom:0; z-index: 30;
-    padding-bottom: env(safe-area-inset-bottom, 0px);
-    background: var(--bg-raised); border-top: 1px solid var(--line);
-  }
+  nav.tabbar { position: fixed; left:0; right:0; bottom:0; z-index: 30; padding-bottom: env(safe-area-inset-bottom, 0px); background: var(--bg-raised); border-top: 1px solid var(--line); }
   .tabbar-inner { max-width:520px; margin:0 auto; display:flex; }
   .tab { flex:1; border:none; background:none; padding: 11px 4px 9px; display:flex; flex-direction:column; align-items:center; gap:3px; color: var(--ink-faint); cursor:pointer; }
   .tab.active { color: var(--brand); }
   .tab .ic { font-size: 19px; }
   .tab .lb { font-size: 10.5px; font-weight:700; }
 
-  .modal-scrim { position:fixed; inset:0; background: rgba(15,17,12,0.45); z-index:50; display:none; align-items:flex-end; }
+  .modal-scrim { position:fixed; inset:0; background: rgba(6,7,8,0.8); z-index:50; display:none; align-items:flex-end; }
   .modal-scrim.open { display:flex; }
-  .modal-sheet { background: var(--bg); width:100%; max-width:520px; margin:0 auto; border-radius: 22px 22px 0 0; padding: 20px 20px calc(env(safe-area-inset-bottom,0px) + 24px); max-height: 86vh; overflow-y:auto; }
-  .modal-sheet h3 { margin: 0 0 14px; font-size:17px; }
-  .modal-head { display:flex; justify-content:space-between; align-items:center; }
+  .modal-sheet { background: var(--bg-raised); border-top: 2px solid var(--brand); width:100%; max-width:520px; margin:0 auto; border-radius: 22px 22px 0 0; padding: 20px 20px calc(env(safe-area-inset-bottom,0px) + 24px); max-height: 86vh; overflow-y:auto; }
+  .modal-sheet h3 { margin: 0; font-size:17px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .modal-head { display:flex; justify-content:space-between; align-items:center; margin-bottom: 6px; }
   .close-x { background:none; border:none; font-size:20px; color: var(--ink-faint); cursor:pointer; }
 
-  .toast { position: fixed; left:50%; transform: translateX(-50%); bottom: calc(env(safe-area-inset-bottom,0px) + 84px); background: var(--ink); color: var(--bg); font-size:13px; padding:10px 18px; border-radius:999px; z-index:60; opacity:0; pointer-events:none; transition: opacity .25s, bottom .25s; }
+  .toast { position: fixed; left:50%; transform: translateX(-50%); bottom: calc(env(safe-area-inset-bottom,0px) + 84px); background: var(--ink); color: var(--bg); font-weight: 700; font-size:13px; padding:10px 18px; border-radius:999px; z-index:60; opacity:0; pointer-events:none; transition: opacity .25s, bottom .25s; white-space: nowrap; }
   .toast.show { opacity:1; bottom: calc(env(safe-area-inset-bottom,0px) + 100px); }
 
-  /* ===================== FORGE MIND — app-specific ===================== */
-  .overall-card { background: linear-gradient(135deg, var(--brand), var(--accent)); color:#fff; border-radius: var(--radius-lg); padding: 18px 20px; box-shadow: var(--shadow); }
-  .overall-top { display:flex; justify-content:space-between; align-items:baseline; }
-  .overall-top .pct { font-family: var(--font-display); font-size: 30px; font-weight:600; }
-  .overall-top .streak { font-size: 13px; font-weight:700; background: rgba(255,255,255,0.18); padding:5px 10px; border-radius:999px; }
-  .overall-bar-track { height:8px; background: rgba(255,255,255,0.25); border-radius:999px; margin-top:12px; overflow:hidden; }
-  .overall-bar-fill { height:100%; background:#fff; border-radius:999px; transition: width .3s ease; }
-  .overall-sub { font-size:12px; opacity:0.85; margin-top:8px; }
+  /* ===================== MIND — app-specific ===================== */
+  .ring-card { background: var(--bg-raised); border: 1px solid var(--line); border-radius: var(--radius-lg); padding: 22px; display:flex; align-items:center; gap: 20px; }
+  .ring-wrap { position: relative; width: 112px; height: 112px; flex-shrink:0; }
+  .ring-wrap svg { transform: rotate(-90deg); width:100%; height:100%; }
+  .ring-track { fill:none; stroke: var(--surface2); stroke-width: 10; }
+  .ring-fill { fill:none; stroke: var(--brand); stroke-width: 10; stroke-linecap: round; transition: stroke-dashoffset .5s ease; }
+  .ring-center { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+  .ring-center .num { font-family: var(--font-display); font-size: 30px; line-height:1; font-variant-numeric: tabular-nums; }
+  .ring-center .lbl { font-size: 9.5px; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.06em; font-weight:700; margin-top:4px; }
+  .ring-meta { flex:1; }
+  .ring-meta .row { display:flex; justify-content:space-between; align-items:baseline; font-size: 13.5px; padding: 4px 0; color: var(--ink-soft); }
+  .ring-meta .row b { color: var(--ink); font-family: var(--font-display); font-weight: 400; font-size: 16px; letter-spacing: 0.02em; }
+  .ring-meta .row b.streak { color: var(--accent); }
 
-  .cat-list { display:flex; flex-direction:column; gap:10px; margin-top:12px; }
-  .cat-card { background: var(--bg-raised); border-radius: var(--radius-md); padding: 13px 14px; box-shadow: var(--shadow); display:flex; align-items:center; gap:12px; cursor:pointer; border:none; text-align:left; width:100%; }
-  .cat-emoji { font-size: 22px; width:32px; text-align:center; flex-shrink:0; }
-  .cat-body { flex:1; min-width:0; }
-  .cat-top { display:flex; justify-content:space-between; font-size:13.5px; font-weight:700; }
-  .cat-top .cat-amt { color: var(--ink-soft); font-weight:600; font-variant-numeric: tabular-nums; }
-  .cat-bar-track { height:6px; background: var(--brand-soft); border-radius:999px; margin-top:7px; overflow:hidden; }
-  .cat-bar-fill { height:100%; background: var(--brand); border-radius:999px; }
-  .cat-bar-fill.done { background: var(--accent); }
-  .cat-plus { font-size: 20px; color: var(--ink-faint); flex-shrink:0; }
+  .cat-list { display:flex; flex-direction:column; gap:8px; }
+  .cat-card { background: var(--bg-raised); border: 1px solid var(--line); border-radius: var(--radius-md); padding: 13px 14px; display:flex; align-items:center; gap:12px; cursor:pointer; text-align:left; width:100%; color: var(--ink); }
+  .cat-card:active { border-color: var(--brand); }
+  .cat-emoji { font-size: 21px; width:30px; text-align:center; flex-shrink:0; }
+  .cat-body { flex:1; min-width:0; display:block; }
+  .cat-top { display:flex; justify-content:space-between; align-items:baseline; gap:8px; }
+  .cat-name { font-size:14.5px; font-weight:700; }
+  .cat-amt { font-family: var(--font-display); font-size:15px; letter-spacing:0.02em; font-variant-numeric: tabular-nums; white-space:nowrap; }
+  .cat-amt span { color: var(--ink-faint); }
+  .cat-sub { display:block; font-size:11.5px; color: var(--ink-soft); margin-top:2px; }
+  .bar-track { display:block; height:6px; background: var(--surface2); border-radius:999px; margin-top:8px; overflow:hidden; }
+  .bar-fill { display:block; height:100%; background: var(--brand); border-radius:999px; transition: width .4s ease; }
+  .bar-fill.done { background: var(--accent); }
+  .cat-plus { width:30px; height:30px; border-radius: 10px; background: var(--surface2); border: 1px solid var(--line); display:flex; align-items:center; justify-content:center; font-size:18px; color: var(--ink); flex-shrink:0; }
+  .cat-plus.done { color: var(--accent); }
 
-  .week-card { background: var(--bg-raised); border-radius: var(--radius-md); padding: 14px 16px; box-shadow: var(--shadow); margin-bottom:10px; }
+  .log-item { display:flex; align-items:center; gap:12px; padding: 12px 2px; border-bottom: 1px solid var(--line); }
+  .log-item:last-child { border-bottom:none; }
+  .log-item .info { flex:1; min-width:0; }
+  .log-item .name { font-size: 14px; font-weight:600; }
+  .log-item .sub { font-size: 11.5px; color: var(--ink-soft); margin-top:2px; }
+  .log-item .mins { font-family: var(--font-display); font-size:15px; letter-spacing:0.02em; }
+  .icon-btn { background:none; border:none; color: var(--ink-faint); font-size: 17px; cursor:pointer; padding:4px 6px; line-height:1; }
+
+  .chip-row { display:flex; gap:7px; flex-wrap:wrap; margin-top:8px; }
+  .chip { border:1px solid var(--line); background: var(--surface2); color: var(--ink-soft); border-radius:20px; padding:8px 13px; font-size:13px; font-weight:700; cursor:pointer; }
+  .chip.active { background: var(--brand); border-color: var(--brand); color: var(--brand-ink); }
+  .chip.add { border-style: dashed; color: var(--brand); background: transparent; }
+  .step-label { font-size: 10.5px; color: var(--ink-faint); font-weight:700; text-transform: uppercase; letter-spacing: 0.05em; margin-top: 16px; }
+  .ex-note { background: var(--surface2); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; font-size: 13px; color: var(--ink-soft); margin-top: 10px; line-height: 1.45; white-space: pre-wrap; display:none; }
+  .ex-note.show { display:block; }
+  .min-grid { display:grid; grid-template-columns: repeat(4, 1fr); gap:7px; margin-top: 8px; }
+  .min-grid .chip { text-align:center; padding: 10px 4px; border-radius: 10px; }
+
+  .group-head { display:flex; justify-content:space-between; align-items:baseline; margin: 22px 0 4px; padding-bottom: 5px; border-bottom: 1.5px solid var(--line); }
+  .group-head h3 { font-size: 14px; margin:0; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.05em; }
+  .group-head .add-mini { background:none; border:none; color: var(--brand); font-size: 12.5px; font-weight: 700; cursor:pointer; padding: 2px; }
+  .ex-row { display:flex; align-items:center; gap:10px; padding: 12px 2px; border-bottom: 1px solid var(--line); }
+  .ex-row:last-child { border-bottom:none; }
+  .ex-row .info { flex:1; min-width:0; cursor:pointer; }
+  .ex-row .name { font-size: 14.5px; font-weight:600; }
+  .ex-row .sub { font-size: 12px; color: var(--ink-soft); margin-top:2px; overflow:hidden; text-overflow: ellipsis; white-space:nowrap; }
+  .ex-row .log-btn { border:none; border-radius:10px; padding: 8px 13px; font-size: 12.5px; font-weight: 700; background: var(--brand); color: var(--brand-ink); cursor:pointer; flex-shrink:0; }
+  .ex-empty { font-size: 12.5px; color: var(--ink-faint); padding: 10px 2px; }
+
+  .week-card { background: var(--bg-raised); border: 1px solid var(--line); border-radius: var(--radius-md); padding: 14px 16px; margin-bottom:10px; }
   .week-head { display:flex; justify-content:space-between; align-items:baseline; }
   .week-head .range { font-weight:700; font-size:14px; }
-  .week-head .pct { font-size:13px; font-weight:700; color: var(--brand); }
-  .week-bar-track { height:6px; background: var(--brand-soft); border-radius:999px; margin-top:8px; overflow:hidden; }
-  .week-bar-fill { height:100%; background: var(--brand); border-radius:999px; }
-  .week-mini { display:flex; flex-wrap:wrap; gap:6px 12px; margin-top:9px; font-size:11.5px; color: var(--ink-soft); }
+  .week-head .pct { font-family: var(--font-display); font-size:17px; color: var(--brand); letter-spacing: 0.02em; }
+  .week-head .pct.done { color: var(--accent); }
+  .week-mini { display:grid; grid-template-columns: repeat(3, 1fr); gap:6px 10px; margin-top:10px; font-size:11.5px; color: var(--ink-soft); }
+  .week-mini b { color: var(--ink); font-weight: 700; }
 
-  .qty-row { display:flex; gap:8px; margin-top:12px; }
-  .qty-row input { text-align:center; }
-  .target-row { display:flex; align-items:center; gap:10px; padding: 10px 0; border-bottom: 1px solid var(--line); }
+  .target-group { background: var(--bg-raised); border: 1px solid var(--line); border-radius: var(--radius-md); padding: 4px 14px; }
+  .target-row { display:flex; align-items:center; gap:12px; padding: 11px 0; border-bottom:1px solid var(--line); }
   .target-row:last-child { border-bottom:none; }
-  .target-row .te { font-size:18px; width:26px; text-align:center; }
-  .target-row .tl { flex:1; font-size:14px; font-weight:600; }
-  .target-row input { width: 72px; text-align:center; }
+  .target-row .te { font-size:19px; width:26px; text-align:center; }
+  .target-row .tl { flex:1; font-size:14.5px; font-weight:600; }
+  .target-row .t-input { display:flex; align-items:center; gap:6px; width:120px; }
+  .target-row .t-input input { text-align:right; }
+  .target-row .t-unit { font-size:12px; color: var(--ink-soft); width:28px; }
+  .note { font-size: 12px; color: var(--ink-faint); margin-top: 10px; line-height: 1.5; }
 </style>
 </head>
 <body>
 <div class="app">
   <header class="topbar">
-    <div class="brandwrap">
-      <span class="brand">FORGE MIND</span>
-      <span class="subline" id="topSubline"></span>
-    </div>
-    <button class="gear-btn" id="openSettings">⚙</button>
+    <span class="brand"><svg viewBox="0 0 40 40" aria-hidden="true"><g fill="none" stroke="var(--brand)" stroke-linecap="round"><path d="M20 3.5 A16.5 16.5 0 0 1 35.6 14.6" stroke-width="4.2"/><path d="M36.2 20.8 A16.5 16.5 0 0 1 24.6 35.9" stroke-width="3.4"/><path d="M17.2 36.2 A16.5 16.5 0 0 1 4.3 25.4" stroke-width="4"/><path d="M4.1 17.4 A16.5 16.5 0 0 1 10.6 6.9" stroke-width="2.8"/></g><path d="M11 28 L11 13 L20 21.5 L29 13 L29 28" fill="none" stroke="var(--ink)" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/></svg>Mind</span>
+    <span class="subline" id="topSubline"></span>
   </header>
 
   <main>
+    <!-- HOME -->
     <section class="screen active" id="screen-home">
-      <div class="overall-card">
-        <div class="overall-top">
-          <span class="pct" id="overallPct">0%</span>
-          <span class="streak" id="streakBadge">🔥 0 wk</span>
+      <div class="ring-card">
+        <div class="ring-wrap">
+          <svg viewBox="0 0 118 118">
+            <circle class="ring-track" cx="59" cy="59" r="50"></circle>
+            <circle class="ring-fill" id="ringFill" cx="59" cy="59" r="50" stroke-dasharray="314.16" stroke-dashoffset="314.16"></circle>
+          </svg>
+          <div class="ring-center"><div class="num" id="ringPct">0%</div><div class="lbl">this week</div></div>
         </div>
-        <div class="overall-bar-track"><div class="overall-bar-fill" id="overallBar" style="width:0%"></div></div>
-        <div class="overall-sub" id="overallSub">This week's progress</div>
+        <div class="ring-meta">
+          <div class="row"><span>Done</span><b id="metaDone">0m</b></div>
+          <div class="row"><span>Target</span><b id="metaTarget">0m</b></div>
+          <div class="row"><span>Streak</span><b class="streak" id="metaStreak">0 wks</b></div>
+        </div>
       </div>
 
       <div class="section-head"><h2>Weekly Progress</h2><span class="hint">tap to log</span></div>
       <div class="cat-list" id="catList"></div>
+
+      <div class="section-head"><h2>This Week's Log</h2></div>
+      <div id="weekLog"></div>
     </section>
 
+    <!-- EXERCISES -->
+    <section class="screen" id="screen-exercises">
+      <button class="btn primary" id="addExerciseBtn">+ Add Exercise</button>
+      <div id="exerciseList"></div>
+    </section>
+
+    <!-- HISTORY -->
     <section class="screen" id="screen-history">
       <div class="section-head"><h2>History</h2></div>
       <div id="historyList"></div>
+    </section>
+
+    <!-- TARGETS -->
+    <section class="screen" id="screen-targets">
+      <div class="section-head"><h2>Weekly Targets</h2><span class="hint">minutes / week</span></div>
+      <div class="target-group" id="targetList"></div>
+      <button class="btn primary" id="saveTargets" style="margin-top:16px;">Save Targets</button>
+      <p class="note">Weeks run Monday to Sunday. Your streak counts weeks where you hit your total weekly target.</p>
     </section>
   </main>
 
   <nav class="tabbar">
     <div class="tabbar-inner">
       <button class="tab active" data-screen="home"><span class="ic">◉</span><span class="lb">Home</span></button>
+      <button class="tab" data-screen="exercises"><span class="ic">✦</span><span class="lb">Exercises</span></button>
       <button class="tab" data-screen="history"><span class="ic">▤</span><span class="lb">History</span></button>
+      <button class="tab" data-screen="targets"><span class="ic">◎</span><span class="lb">Targets</span></button>
     </div>
   </nav>
 </div>
@@ -226,6 +271,7 @@
   const APP_PREFIX = 'forgemind_';
 
   const $ = (id) => document.getElementById(id);
+  const uid_ = () => 'id' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
   const escapeHtml = (s) => String(s || '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
   let toastTimer;
@@ -266,31 +312,60 @@
   $('genericModalScrim').addEventListener('click', (e) => { if (e.target === $('genericModalScrim')) closeModal(); });
 
   /* ============================================================
-     FORGE MIND — app-specific code
+     MIND — app-specific code
+     Data (all in localStorage, prefixed forgemind_):
+       targets   { catKey: minutesPerWeek }
+       exercises [ { id, cat, name, notes, mins } ]
+       entries   [ { id, date:'YYYY-MM-DD', cat, exId|null, mins } ]
      ============================================================ */
 
   const CATEGORIES = [
     { key: 'reading',    label: 'Reading',        emoji: '📖' },
-    { key: 'learning',   label: 'Learning',        emoji: '🧠' },
-    { key: 'focus',      label: 'Focus Training',  emoji: '🎯' },
-    { key: 'meditation', label: 'Meditation',      emoji: '🧘' },
-    { key: 'breathing',  label: 'Breathing',       emoji: '🌬️' },
-    { key: 'braingames', label: 'Brain Games',     emoji: '🧩' }
+    { key: 'learning',   label: 'Learning',       emoji: '🧠' },
+    { key: 'focus',      label: 'Focus Training', emoji: '🎯' },
+    { key: 'meditation', label: 'Meditation',     emoji: '🧘' },
+    { key: 'breathing',  label: 'Breathing',      emoji: '🌬️' },
+    { key: 'braingames', label: 'Brain Games',    emoji: '🧩' }
   ];
+  const catBy = (k) => CATEGORIES.find(c => c.key === k);
 
   const DEFAULT_TARGETS = { reading: 180, learning: 120, focus: 60, meditation: 60, breathing: 30, braingames: 30 };
 
-  function getTargets() { return store.get('targets', DEFAULT_TARGETS); }
-  function getWeeks() { return store.get('weeks', {}); }
+  // A few starter exercises so the app isn't empty. All editable / deletable.
+  const STARTER_EXERCISES = [
+    { cat: 'reading',    name: 'Book reading', mins: 30, notes: '' },
+    { cat: 'learning',   name: 'Online course', mins: 30, notes: '' },
+    { cat: 'learning',   name: 'Language practice', mins: 15, notes: '' },
+    { cat: 'focus',      name: 'Deep work block', mins: 25, notes: 'Pick one task. Phone out of reach. Work without switching until the timer ends.' },
+    { cat: 'focus',      name: 'Single-point focus', mins: 5, notes: 'Rest your eyes on one point (a dot, a candle). When your attention drifts, notice it and bring it back.' },
+    { cat: 'meditation', name: 'Guided meditation', mins: 10, notes: '' },
+    { cat: 'meditation', name: 'Body scan', mins: 10, notes: 'Slowly move attention from your feet to your head, noticing sensations without trying to change them.' },
+    { cat: 'breathing',  name: 'Box breathing', mins: 5, notes: 'In for 4 · hold 4 · out for 4 · hold 4. Repeat.' },
+    { cat: 'breathing',  name: '4-7-8 breathing', mins: 5, notes: 'In through the nose for 4 · hold 7 · out slowly through the mouth for 8.' },
+    { cat: 'braingames', name: 'Sudoku', mins: 15, notes: '' },
+    { cat: 'braingames', name: 'Chess puzzles', mins: 15, notes: '' }
+  ];
 
-  function getWeekKey(d) {
-    const date = new Date(d);
-    const day = (date.getDay() + 6) % 7; // 0 = Monday
-    date.setDate(date.getDate() - day);
-    date.setHours(0, 0, 0, 0);
-    return date.toISOString().slice(0, 10);
+  const getTargets = () => Object.assign({}, DEFAULT_TARGETS, store.get('targets', {}));
+  const getExercises = () => store.get('exercises', []);
+  const getEntries = () => store.get('entries', []);
+
+  // ---------- dates & weeks (Monday start, local time) ----------
+  const pad = (n) => String(n).padStart(2, '0');
+  const ymd = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+  const parseYmd = (s) => { const [y, m, d] = s.split('-').map(Number); return new Date(y, m - 1, d); };
+  function weekStart(d) {
+    const x = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+    x.setDate(x.getDate() - ((x.getDay() + 6) % 7));
+    return x;
   }
-  function currentWeekKey() { return getWeekKey(new Date()); }
+  const weekKey = (d) => ymd(weekStart(d));
+  const thisWeekKey = () => weekKey(new Date());
+  function weekRangeLabel(key) {
+    const s = parseYmd(key); const e = new Date(s); e.setDate(e.getDate() + 6);
+    const o = { month: 'short', day: 'numeric' };
+    return `${s.toLocaleDateString(undefined, o)} – ${e.toLocaleDateString(undefined, o)}`;
+  }
 
   function formatMins(m) {
     m = Math.round(m || 0);
@@ -299,157 +374,286 @@
     return r ? `${h}h ${r}m` : `${h}h`;
   }
 
-  function weekRangeLabel(weekKey) {
-    const start = new Date(weekKey + 'T00:00:00');
-    const end = new Date(start); end.setDate(end.getDate() + 6);
-    const opts = { month: 'short', day: 'numeric' };
-    return `${start.toLocaleDateString(undefined, opts)} – ${end.toLocaleDateString(undefined, opts)}`;
+  // Totals per category for one week
+  function weekTotals(key) {
+    const t = {}; CATEGORIES.forEach(c => t[c.key] = 0);
+    getEntries().forEach(e => { if (weekKey(parseYmd(e.date)) === key && t[e.cat] !== undefined) t[e.cat] += e.mins; });
+    return t;
+  }
+  const sum = (obj) => Object.values(obj).reduce((a, b) => a + b, 0);
+
+  // Weekly % = each category capped at its own target, so overdoing one
+  // category can't fake a full week.
+  function weekPct(totals, targets) {
+    const tt = sum(targets); if (tt <= 0) return 0;
+    let got = 0; CATEGORIES.forEach(c => got += Math.min(totals[c.key] || 0, targets[c.key] || 0));
+    return Math.round((got / tt) * 100);
   }
 
-  function addTime(catKey, minutes) {
-    const weeks = getWeeks();
-    const key = currentWeekKey();
-    if (!weeks[key]) weeks[key] = {};
-    weeks[key][catKey] = (weeks[key][catKey] || 0) + minutes;
-    store.set('weeks', weeks);
-    const cat = CATEGORIES.find(c => c.key === catKey);
-    toast(`+${formatMins(minutes)} ${cat.label}`);
-    renderHome();
-  }
-
+  // Streak: consecutive completed weeks. The current week only adds to the
+  // streak once it's complete — an unfinished week doesn't break it.
   function computeStreak() {
-    const weeks = getWeeks();
     const targets = getTargets();
-    const totalTarget = Object.values(targets).reduce((a, b) => a + b, 0);
-    if (totalTarget <= 0) return 0;
     let streak = 0;
-    let cursor = new Date();
-    while (true) {
-      const key = getWeekKey(cursor);
-      const wd = weeks[key] || {};
-      const total = Object.values(wd).reduce((a, b) => a + b, 0);
-      if (total >= totalTarget) { streak++; cursor.setDate(cursor.getDate() - 7); }
-      else break;
+    if (weekPct(weekTotals(thisWeekKey()), targets) >= 100) streak++;
+    const cursor = weekStart(new Date());
+    for (let i = 0; i < 520; i++) {
+      cursor.setDate(cursor.getDate() - 7);
+      if (weekPct(weekTotals(ymd(cursor)), targets) >= 100) streak++; else break;
     }
     return streak;
   }
 
+  // ---------- logging ----------
+  function addEntry(cat, exId, mins) {
+    const entries = getEntries();
+    entries.push({ id: uid_(), date: ymd(new Date()), cat, exId: exId || null, mins });
+    store.set('entries', entries);
+    const ex = exId ? getExercises().find(x => x.id === exId) : null;
+    toast(`+${formatMins(mins)} ${ex ? ex.name : catBy(cat).label}`);
+    renderHome();
+  }
+
+  // Log sheet: pick an exercise in the category (optional), then a duration.
+  function openLogSheet(cat, preselectExId) {
+    const c = catBy(cat);
+    const exs = getExercises().filter(x => x.cat === cat);
+    let selected = preselectExId || null;
+    let mins = null;
+
+    const exChips = exs.map(x => `<button class="chip${x.id === selected ? ' active' : ''}" data-ex="${x.id}">${escapeHtml(x.name)}</button>`).join('');
+    const body = `
+      <div class="step-label">Exercise</div>
+      <div class="chip-row" id="exChips">
+        <button class="chip${selected ? '' : ' active'}" data-ex="">General</button>
+        ${exChips}
+        <button class="chip add" id="newExFromLog">+ New</button>
+      </div>
+      <div class="ex-note" id="exNote"></div>
+      <div class="step-label">Time</div>
+      <div class="min-grid" id="minGrid">
+        ${[5, 10, 15, 20, 30, 45, 60, 90].map(m => `<button class="chip" data-m="${m}">${formatMins(m)}</button>`).join('')}
+      </div>
+      <div class="field"><label>Or custom minutes</label><input type="number" id="customMins" min="1" inputmode="numeric" placeholder="e.g. 25"></div>
+      <button class="btn primary" id="logBtn" style="margin-top:18px;">Log Time</button>`;
+
+    openModal(`${c.emoji}  ${c.label}`, body, () => {
+      const showNote = () => {
+        const ex = exs.find(x => x.id === selected);
+        const n = $('exNote');
+        n.textContent = ex && ex.notes ? ex.notes : '';
+        n.classList.toggle('show', !!(ex && ex.notes));
+      };
+      const setMins = (m) => {
+        mins = m;
+        document.querySelectorAll('#minGrid .chip').forEach(b => b.classList.toggle('active', parseInt(b.dataset.m, 10) === m));
+        $('logBtn').textContent = m ? `Log ${formatMins(m)}` : 'Log Time';
+      };
+      // Pre-fill the exercise's usual duration
+      const applyDefault = () => { const ex = exs.find(x => x.id === selected); if (ex && ex.mins) { $('customMins').value = ''; setMins(ex.mins); } };
+
+      document.querySelectorAll('#exChips [data-ex]').forEach(b => b.addEventListener('click', () => {
+        selected = b.dataset.ex || null;
+        document.querySelectorAll('#exChips [data-ex]').forEach(x => x.classList.toggle('active', x === b));
+        showNote(); applyDefault();
+      }));
+      document.querySelectorAll('#minGrid .chip').forEach(b => b.addEventListener('click', () => { $('customMins').value = ''; setMins(parseInt(b.dataset.m, 10)); }));
+      $('customMins').addEventListener('input', () => { const v = parseInt($('customMins').value, 10); setMins(v > 0 ? v : null); });
+      $('newExFromLog').addEventListener('click', () => openExerciseEditor(null, cat, true));
+      $('logBtn').addEventListener('click', () => {
+        if (!mins || mins <= 0) { toast('Pick a time first'); return; }
+        addEntry(cat, selected, mins); closeModal();
+      });
+      showNote(); applyDefault();
+    });
+  }
+
+  // ---------- HOME ----------
   function renderHome() {
     const targets = getTargets();
-    const weeks = getWeeks();
-    const wd = weeks[currentWeekKey()] || {};
+    const key = thisWeekKey();
+    const totals = weekTotals(key);
+    const exs = getExercises();
 
-    let totalLogged = 0, totalTarget = 0;
-    const listHtml = CATEGORIES.map(cat => {
-      const logged = wd[cat.key] || 0;
-      const target = targets[cat.key] || 0;
-      totalLogged += logged; totalTarget += target;
-      const pct = target > 0 ? Math.min(100, Math.round((logged / target) * 100)) : 0;
-      const done = pct >= 100;
+    $('topSubline').textContent = weekRangeLabel(key);
+
+    $('catList').innerHTML = CATEGORIES.map(c => {
+      const done = totals[c.key], target = targets[c.key] || 0;
+      const pct = target > 0 ? Math.min(100, Math.round(done / target * 100)) : 0;
+      const complete = target > 0 && done >= target;
+      const n = exs.filter(x => x.cat === c.key).length;
       return `
-        <button class="cat-card" data-log="${cat.key}">
-          <span class="cat-emoji">${cat.emoji}</span>
+        <button class="cat-card" data-cat="${c.key}">
+          <span class="cat-emoji">${c.emoji}</span>
           <span class="cat-body">
-            <span class="cat-top"><span>${escapeHtml(cat.label)}</span><span class="cat-amt">${formatMins(logged)} / ${formatMins(target)}</span></span>
-            <span class="cat-bar-track"><span class="cat-bar-fill${done ? ' done' : ''}" style="width:${pct}%"></span></span>
+            <span class="cat-top"><span class="cat-name">${c.label}</span><span class="cat-amt">${formatMins(done)} <span>/ ${formatMins(target)}</span></span></span>
+            <span class="cat-sub">${n} exercise${n === 1 ? '' : 's'}</span>
+            <span class="bar-track"><span class="bar-fill${complete ? ' done' : ''}" style="width:${pct}%"></span></span>
           </span>
-          <span class="cat-plus">${done ? '✓' : '+'}</span>
+          <span class="cat-plus${complete ? ' done' : ''}">${complete ? '✓' : '+'}</span>
         </button>`;
     }).join('');
-    $('catList').innerHTML = listHtml;
+    document.querySelectorAll('[data-cat]').forEach(b => b.addEventListener('click', () => openLogSheet(b.dataset.cat)));
 
-    const overallPct = totalTarget > 0 ? Math.min(100, Math.round((totalLogged / totalTarget) * 100)) : 0;
-    $('overallPct').textContent = overallPct + '%';
-    $('overallBar').style.width = overallPct + '%';
-    $('overallSub').textContent = `${formatMins(totalLogged)} of ${formatMins(totalTarget)} this week`;
-    $('streakBadge').textContent = `🔥 ${computeStreak()} wk`;
+    const pct = weekPct(totals, targets);
+    $('ringPct').textContent = pct + '%';
+    $('ringFill').setAttribute('stroke-dashoffset', (314.16 * (1 - Math.min(pct, 100) / 100)).toFixed(2));
+    $('metaDone').textContent = formatMins(sum(totals));
+    $('metaTarget').textContent = formatMins(sum(targets));
+    const s = computeStreak();
+    $('metaStreak').textContent = `🔥 ${s} wk${s === 1 ? '' : 's'}`;
 
-    document.querySelectorAll('[data-log]').forEach(btn => {
-      btn.addEventListener('click', () => openLogModal(btn.dataset.log));
-    });
-  }
-
-  function openLogModal(catKey) {
-    const cat = CATEGORIES.find(c => c.key === catKey);
-    const body = `
-      <p style="margin:0 0 4px;color:var(--ink-soft);font-size:13.5px;">Log time for ${escapeHtml(cat.label)}</p>
-      <div class="chip-row">
-        <button class="chip-btn" data-mins="15">+15m</button>
-        <button class="chip-btn" data-mins="30">+30m</button>
-        <button class="chip-btn" data-mins="60">+1h</button>
-      </div>
-      <div class="qty-row">
-        <div class="field"><label>CUSTOM MINUTES</label><input type="number" id="customMins" min="1" placeholder="e.g. 20"></div>
-        <button class="btn primary" style="width:auto;align-self:flex-end;" id="customAdd">Add</button>
-      </div>`;
-    openModal(cat.label, body, () => {
-      document.querySelectorAll('[data-mins]').forEach(b => {
-        b.addEventListener('click', () => { addTime(catKey, parseInt(b.dataset.mins, 10)); closeModal(); });
-      });
-      $('customAdd').addEventListener('click', () => {
-        const v = parseInt($('customMins').value, 10);
-        if (v > 0) { addTime(catKey, v); closeModal(); }
-      });
-    });
-  }
-
-  function openSettingsModal() {
-    const targets = getTargets();
-    const rows = CATEGORIES.map(cat => `
-      <div class="target-row">
-        <span class="te">${cat.emoji}</span>
-        <span class="tl">${escapeHtml(cat.label)}</span>
-        <input type="number" min="0" id="target_${cat.key}" value="${targets[cat.key] || 0}">
-        <span style="font-size:11.5px;color:var(--ink-faint);">min/wk</span>
-      </div>`).join('');
-    const body = `
-      <div>${rows}</div>
-      <button class="btn primary" id="saveTargets" style="margin-top:16px;">Save Targets</button>`;
-    openModal('Weekly Targets', body, () => {
-      $('saveTargets').addEventListener('click', () => {
-        const newTargets = {};
-        CATEGORIES.forEach(cat => {
-          const v = parseInt($('target_' + cat.key).value, 10);
-          newTargets[cat.key] = isNaN(v) || v < 0 ? 0 : v;
-        });
-        store.set('targets', newTargets);
-        closeModal();
-        toast('Targets updated');
-        renderHome();
-      });
-    });
-  }
-  $('openSettings').addEventListener('click', openSettingsModal);
-
-  function renderHistory() {
-    const weeks = getWeeks();
-    const targets = getTargets();
-    const totalTarget = Object.values(targets).reduce((a, b) => a + b, 0);
-    const keys = Object.keys(weeks).filter(k => k !== currentWeekKey()).sort().reverse();
-
-    if (keys.length === 0) {
-      $('historyList').innerHTML = `<div class="empty-state"><div class="emoji">🧩</div><p>No past weeks yet.</p><p>Finish this week to start your history.</p></div>`;
+    // This week's individual entries (newest first) with delete, so mistakes can be undone
+    const list = getEntries().filter(e => weekKey(parseYmd(e.date)) === key).reverse();
+    if (!list.length) {
+      $('weekLog').innerHTML = `<div class="empty-state"><div class="emoji">🧠</div><p>Nothing logged yet this week.</p><p>Tap a category above to start.</p></div>`;
       return;
     }
+    $('weekLog').innerHTML = `<div class="card" style="padding:2px 14px;">${list.map(e => {
+      const c = catBy(e.cat); const ex = e.exId ? exs.find(x => x.id === e.exId) : null;
+      const day = parseYmd(e.date).toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'short' });
+      return `<div class="log-item">
+          <span class="cat-emoji">${c ? c.emoji : '•'}</span>
+          <div class="info"><div class="name">${escapeHtml(ex ? ex.name : (c ? c.label : 'Entry'))}</div><div class="sub">${day}${ex ? ' · ' + c.label : ''}</div></div>
+          <span class="mins">${formatMins(e.mins)}</span>
+          <button class="icon-btn" data-del="${e.id}" aria-label="Delete">✕</button>
+        </div>`;
+    }).join('')}</div>`;
+    document.querySelectorAll('[data-del]').forEach(b => b.addEventListener('click', () => {
+      if (!confirm('Delete this entry?')) return;
+      store.set('entries', getEntries().filter(e => e.id !== b.dataset.del));
+      toast('Entry deleted'); renderHome();
+    }));
+  }
 
-    $('historyList').innerHTML = keys.map(key => {
-      const wd = weeks[key];
-      const total = Object.values(wd).reduce((a, b) => a + b, 0);
-      const pct = totalTarget > 0 ? Math.min(100, Math.round((total / totalTarget) * 100)) : 0;
-      const mini = CATEGORIES.map(cat => `${cat.emoji} ${formatMins(wd[cat.key] || 0)}`).join('&nbsp;&nbsp;');
+  // ---------- EXERCISES ----------
+  function renderExercises() {
+    const exs = getExercises();
+    $('exerciseList').innerHTML = CATEGORIES.map(c => {
+      const items = exs.filter(x => x.cat === c.key);
+      const rows = items.length ? items.map(x => `
+        <div class="ex-row">
+          <div class="info" data-edit="${x.id}">
+            <div class="name">${escapeHtml(x.name)}</div>
+            <div class="sub">${x.mins ? formatMins(x.mins) : 'No default time'}${x.notes ? ' · ' + escapeHtml(x.notes) : ''}</div>
+          </div>
+          <button class="log-btn" data-logex="${x.id}" data-logcat="${c.key}">Log</button>
+        </div>`).join('') : `<div class="ex-empty">No exercises yet.</div>`;
+      return `
+        <div class="group-head"><h3>${c.emoji} ${c.label}</h3><button class="add-mini" data-addcat="${c.key}">+ Add</button></div>
+        <div>${rows}</div>`;
+    }).join('');
+
+    document.querySelectorAll('[data-edit]').forEach(el => el.addEventListener('click', () => openExerciseEditor(el.dataset.edit)));
+    document.querySelectorAll('[data-logex]').forEach(el => el.addEventListener('click', () => openLogSheet(el.dataset.logcat, el.dataset.logex)));
+    document.querySelectorAll('[data-addcat]').forEach(el => el.addEventListener('click', () => openExerciseEditor(null, el.dataset.addcat)));
+  }
+  $('addExerciseBtn').addEventListener('click', () => openExerciseEditor(null, 'reading'));
+
+  // Add / edit an exercise. reopenLog = came from the log sheet, so go back to it after saving.
+  function openExerciseEditor(id, defaultCat, reopenLog) {
+    const existing = id ? getExercises().find(x => x.id === id) : null;
+    let cat = existing ? existing.cat : (defaultCat || 'reading');
+    const body = `
+      <div class="field"><label>Name</label><input type="text" id="exName" maxlength="60" placeholder="e.g. Box breathing" value="${escapeHtml(existing ? existing.name : '')}"></div>
+      <div class="step-label">Category</div>
+      <div class="chip-row" id="catChips">
+        ${CATEGORIES.map(c => `<button class="chip${c.key === cat ? ' active' : ''}" data-c="${c.key}">${c.emoji} ${c.label}</button>`).join('')}
+      </div>
+      <div class="field"><label>Usual time (minutes, optional)</label><input type="number" id="exMins" min="0" inputmode="numeric" placeholder="e.g. 10" value="${existing && existing.mins ? existing.mins : ''}"></div>
+      <div class="field"><label>How to do it (optional)</label><textarea id="exNotes" maxlength="400" placeholder="Short instructions or a reminder">${escapeHtml(existing ? existing.notes : '')}</textarea></div>
+      <button class="btn primary" id="saveEx" style="margin-top:18px;">${existing ? 'Save Changes' : 'Add Exercise'}</button>
+      ${existing ? '<div style="text-align:center;margin-top:8px;"><button class="btn danger-text" id="delEx">Delete exercise</button></div>' : ''}`;
+
+    openModal(existing ? 'Edit Exercise' : 'New Exercise', body, () => {
+      document.querySelectorAll('#catChips [data-c]').forEach(b => b.addEventListener('click', () => {
+        cat = b.dataset.c;
+        document.querySelectorAll('#catChips [data-c]').forEach(x => x.classList.toggle('active', x === b));
+      }));
+      $('saveEx').addEventListener('click', () => {
+        const name = $('exName').value.trim();
+        if (!name) { toast('Give it a name'); return; }
+        const mins = parseInt($('exMins').value, 10);
+        const data = { cat, name, mins: mins > 0 ? mins : 0, notes: $('exNotes').value.trim() };
+        const exs = getExercises();
+        let savedId = id;
+        if (existing) Object.assign(exs.find(x => x.id === id), data);
+        else { savedId = uid_(); exs.push(Object.assign({ id: savedId }, data)); }
+        store.set('exercises', exs);
+        toast(existing ? 'Exercise saved' : 'Exercise added');
+        renderExercises(); renderHome();
+        if (reopenLog) openLogSheet(cat, savedId); else closeModal();
+      });
+      if (existing) $('delEx').addEventListener('click', () => {
+        if (!confirm(`Delete "${existing.name}"? Time you've already logged stays in your totals.`)) return;
+        store.set('exercises', getExercises().filter(x => x.id !== id));
+        toast('Exercise deleted'); closeModal(); renderExercises(); renderHome();
+      });
+      if (!existing) setTimeout(() => $('exName').focus(), 50);
+    });
+  }
+
+  // ---------- HISTORY ----------
+  function renderHistory() {
+    const targets = getTargets();
+    const keys = [...new Set(getEntries().map(e => weekKey(parseYmd(e.date))))].sort().reverse();
+    if (!keys.length) {
+      $('historyList').innerHTML = `<div class="empty-state"><div class="emoji">▤</div><p>No history yet.</p><p>Your weeks will appear here as you log time.</p></div>`;
+      return;
+    }
+    const now = thisWeekKey();
+    $('historyList').innerHTML = keys.map(k => {
+      const t = weekTotals(k); const pct = weekPct(t, targets);
       return `
         <div class="week-card">
-          <div class="week-head"><span class="range">${weekRangeLabel(key)}</span><span class="pct">${pct}%</span></div>
-          <div class="week-bar-track"><div class="week-bar-fill" style="width:${pct}%"></div></div>
-          <div class="week-mini">${mini}</div>
+          <div class="week-head"><span class="range">${k === now ? 'This week' : weekRangeLabel(k)}</span><span class="pct${pct >= 100 ? ' done' : ''}">${pct}%${pct >= 100 ? ' ✓' : ''}</span></div>
+          <div class="bar-track"><div class="bar-fill${pct >= 100 ? ' done' : ''}" style="width:${Math.min(pct, 100)}%"></div></div>
+          <div class="week-mini">${CATEGORIES.map(c => `<span>${c.emoji} <b>${formatMins(t[c.key])}</b></span>`).join('')}</div>
         </div>`;
     }).join('');
   }
 
+  // ---------- TARGETS ----------
+  function renderTargets() {
+    const t = getTargets();
+    $('targetList').innerHTML = CATEGORIES.map(c => `
+      <div class="target-row">
+        <span class="te">${c.emoji}</span><span class="tl">${c.label}</span>
+        <div class="t-input"><input type="number" min="0" inputmode="numeric" id="target_${c.key}" value="${t[c.key]}"><span class="t-unit">min</span></div>
+      </div>`).join('');
+  }
+  $('saveTargets').addEventListener('click', () => {
+    const nt = {};
+    CATEGORIES.forEach(c => { const v = parseInt($('target_' + c.key).value, 10); nt[c.key] = isNaN(v) || v < 0 ? 0 : v; });
+    store.set('targets', nt);
+    toast('Targets saved'); renderHome();
+  });
+
+  // ---------- boot ----------
+  function migrate() {
+    // Version 1 of the app stored per-week totals under 'weeks'. Convert those
+    // into entries once, so nothing already logged is lost. (Dated mid-week so
+    // time-zone quirks in the old week keys can't push them into the wrong week.)
+    const old = store.get('weeks', null);
+    if (old && !store.get('migrated_v2', false)) {
+      const entries = getEntries();
+      Object.keys(old).forEach(wk => Object.keys(old[wk] || {}).forEach(cat => {
+        const m = old[wk][cat]; if (m > 0 && catBy(cat)) { const d = parseYmd(wk); d.setDate(d.getDate() + 3); const today = new Date(); if (d > today) d.setTime(today.getTime()); entries.push({ id: uid_(), date: ymd(d), cat, exId: null, mins: m }); }
+      }));
+      store.set('entries', entries);
+      store.set('migrated_v2', true);
+    }
+    if (!store.get('exercises', null)) store.set('exercises', STARTER_EXERCISES.map(x => Object.assign({ id: uid_() }, x)));
+  }
+
   function boot() {
-    if (!store.get('targets', null)) store.set('targets', DEFAULT_TARGETS);
-    $('topSubline').textContent = new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' });
-    onScreenEnter = (name) => { if (name === 'history') renderHistory(); };
+    migrate();
+    onScreenEnter = (name) => {
+      if (name === 'home') renderHome();
+      if (name === 'exercises') renderExercises();
+      if (name === 'history') renderHistory();
+      if (name === 'targets') renderTargets();
+    };
     renderHome();
   }
 
