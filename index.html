@@ -145,6 +145,8 @@
 
   .log-item { display:flex; align-items:center; gap:12px; padding: 12px 2px; border-bottom: 1px solid var(--line); }
   .log-item:last-child { border-bottom:none; }
+  .log-item.tappable { cursor:pointer; }
+  .log-item.tappable:active .name { color: var(--brand); }
   .log-item .info { flex:1; min-width:0; }
   .log-item .name { font-size: 14px; font-weight:600; }
   .log-item .sub { font-size: 11.5px; color: var(--ink-soft); margin-top:2px; }
@@ -512,7 +514,7 @@
     $('weekLog').innerHTML = `<div class="card" style="padding:2px 14px;">${list.map(e => {
       const c = catBy(e.cat); const ex = e.exId ? exs.find(x => x.id === e.exId) : null;
       const day = parseYmd(e.date).toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'short' });
-      return `<div class="log-item">
+      return `<div class="log-item tappable" data-edit="${e.id}">
           <span class="cat-emoji">${c ? c.emoji : '•'}</span>
           <div class="info"><div class="name">${escapeHtml(ex ? ex.name : (c ? c.label : 'Entry'))}</div><div class="sub">${day}${ex ? ' · ' + c.label : ''}</div></div>
           <span class="mins">${formatMins(e.mins)}</span>
@@ -524,6 +526,64 @@
       store.set('entries', getEntries().filter(e => e.id !== b.dataset.del));
       toast('Entry deleted'); renderHome();
     }));
+    document.querySelectorAll('[data-edit]').forEach(row => row.addEventListener('click', (ev) => {
+      if (ev.target.closest('[data-del]')) return;   // the X is its own shortcut
+      openEntryEditor(row.dataset.edit);
+    }));
+  }
+
+  // Edit something already logged: how long it was, what it was, or which
+  // day it belongs to. Mis-taps and forgotten days are the two things that
+  // actually go wrong, and neither could be fixed before.
+  function openEntryEditor(id) {
+    const entry = getEntries().find(e => e.id === id);
+    if (!entry) return;
+    let cat = entry.cat;
+    let exId = entry.exId || null;
+
+    const exChipsFor = (c) =>
+      `<button class="chip${exId ? '' : ' active'}" data-eex="">General</button>` +
+      getExercises().filter(x => x.cat === c)
+        .map(x => `<button class="chip${x.id === exId ? ' active' : ''}" data-eex="${x.id}">${escapeHtml(x.name)}</button>`).join('');
+
+    const body = `
+      <div class="step-label">Category</div>
+      <div class="chip-row" id="edCats">
+        ${CATEGORIES.map(c => `<button class="chip${c.key === cat ? ' active' : ''}" data-ecat="${c.key}">${c.emoji} ${c.label}</button>`).join('')}
+      </div>
+      <div class="step-label">Exercise</div>
+      <div class="chip-row" id="edExs">${exChipsFor(cat)}</div>
+      <div class="field"><label>Minutes</label><input type="number" id="edMins" min="1" inputmode="numeric" value="${Number(entry.mins) || 0}"></div>
+      <div class="field"><label>Day</label><input type="date" id="edDate" value="${entry.date}"></div>
+      <button class="btn primary" id="edSave" style="margin-top:18px;">Save Changes</button>
+      <div style="text-align:center;margin-top:8px;"><button class="btn danger-text" id="edDel">Delete entry</button></div>`;
+
+    openModal('Edit Entry', body, () => {
+      function wireEx() {
+        document.querySelectorAll('[data-eex]').forEach(b => b.addEventListener('click', () => {
+          exId = b.dataset.eex || null;
+          document.querySelectorAll('[data-eex]').forEach(x => x.classList.toggle('active', x === b));
+        }));
+      }
+      document.querySelectorAll('[data-ecat]').forEach(b => b.addEventListener('click', () => {
+        cat = b.dataset.ecat; exId = null;
+        document.querySelectorAll('[data-ecat]').forEach(x => x.classList.toggle('active', x === b));
+        $('edExs').innerHTML = exChipsFor(cat);
+        wireEx();
+      }));
+      wireEx();
+      $('edSave').addEventListener('click', () => {
+        const mins = Math.max(1, Number($('edMins').value) || 0);
+        const date = /^\d{4}-\d{2}-\d{2}$/.test($('edDate').value) ? $('edDate').value : entry.date;
+        store.set('entries', getEntries().map(e =>
+          e.id === id ? Object.assign({}, e, { cat: cat, exId: exId, mins: mins, date: date }) : e));
+        closeModal(); toast('Entry updated'); renderHome();
+      });
+      $('edDel').addEventListener('click', () => {
+        store.set('entries', getEntries().filter(e => e.id !== id));
+        closeModal(); toast('Entry deleted'); renderHome();
+      });
+    });
   }
 
   // ---------- EXERCISES ----------
