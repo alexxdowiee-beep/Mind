@@ -114,6 +114,16 @@
   .toast.show { opacity:1; bottom: calc(env(safe-area-inset-bottom,0px) + 100px); }
 
   /* ===================== MIND — app-specific ===================== */
+  .timer-card { background: var(--bg-raised); border: 1px solid var(--brand); border-radius: var(--radius-lg); padding: 16px 18px; margin-bottom: 14px; }
+  .timer-card.paused { border-color: var(--line); }
+  .tm-top { display:flex; justify-content:space-between; align-items:center; gap:10px; }
+  .tm-name { font-weight:700; font-size:14px; }
+  .tm-state { font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; color: var(--brand); }
+  .timer-card.paused .tm-state { color: var(--ink-faint); }
+  .tm-clock { font-family: var(--font-display); font-size: 46px; line-height: 1.1; margin: 8px 0 6px; font-variant-numeric: tabular-nums; letter-spacing: 0.02em; }
+  .tm-target { font-size: 11.5px; color: var(--ink-soft); margin-top: 6px; font-weight:600; }
+  .tm-btns { display:grid; grid-template-columns: 1fr 1.4fr; gap: 8px; margin-top: 14px; }
+  .ex-row .log-btn.tm { margin-right: 6px; background: var(--surface2); color: var(--brand); border: 1px solid var(--line); }
   .ring-card { background: var(--bg-raised); border: 1px solid var(--line); border-radius: var(--radius-lg); padding: 22px; display:flex; align-items:center; gap: 20px; }
   .ring-wrap { position: relative; width: 112px; height: 112px; flex-shrink:0; }
   .ring-wrap svg { transform: rotate(-90deg); width:100%; height:100%; }
@@ -196,13 +206,14 @@
 <body>
 <div class="app">
   <header class="topbar">
-    <span class="brand"><svg viewBox="0 0 40 40" aria-hidden="true"><g fill="none" stroke="var(--brand)" stroke-linecap="round"><path d="M20 3.5 A16.5 16.5 0 0 1 35.6 14.6" stroke-width="4.2"/><path d="M36.2 20.8 A16.5 16.5 0 0 1 24.6 35.9" stroke-width="3.4"/><path d="M17.2 36.2 A16.5 16.5 0 0 1 4.3 25.4" stroke-width="4"/><path d="M4.1 17.4 A16.5 16.5 0 0 1 10.6 6.9" stroke-width="2.8"/></g><path d="M11 28 L11 13 L20 21.5 L29 13 L29 28" fill="none" stroke="var(--ink)" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/></svg>Mind</span>
+    <span class="brand"><svg viewBox="68 68 376 376" aria-hidden="true"><path d="M390.2,154.9 A168,168 0 0 1 179.7,405.7 M121.8,357.1 A168,168 0 0 1 332.3,106.3" fill="none" stroke="var(--brand)" stroke-width="30"/><g fill="var(--ink)" transform="translate(256 256) skewX(-12) translate(-256 -256) translate(171.0 156)"><polygon points="0,200 0,0 46,0 85,78 124,0 170,0 170,200 124,200 124,88 98,140 72,140 46,88 46,200"/></g></svg>Mind</span>
     <span class="subline" id="topSubline"></span>
   </header>
 
   <main>
     <!-- HOME -->
     <section class="screen active" id="screen-home">
+      <div id="timerCard"></div>
       <div class="ring-card">
         <div class="ring-wrap">
           <svg viewBox="0 0 118 118">
@@ -243,6 +254,8 @@
       <div class="target-group" id="targetList"></div>
       <button class="btn primary" id="saveTargets" style="margin-top:16px;">Save Targets</button>
       <p class="note">Weeks run Monday to Sunday. Your streak counts weeks where you hit your total weekly target.</p>
+      <div class="section-head"><h2>Backup</h2></div>
+      <div id="backupStatus"></div>
     </section>
   </main>
 
@@ -460,6 +473,95 @@
     renderHome();
   }
 
+
+  // ---------- session timer ----------
+  // Stored, not just kept in memory, so it keeps counting if the phone
+  // locks or the app is closed. Time is always worked out from the
+  // start time, so nothing is lost while the app isn't open.
+  //   timer = { cat, exId, startedAt (ms, null while paused), accMs, targetMins, alerted }
+  const getTimer = () => store.get('timer', null);
+  function timerElapsed(t) { return (t.accMs || 0) + (t.startedAt ? Date.now() - t.startedAt : 0); }
+  function clock(ms) {
+    const s = Math.floor(ms / 1000), h = Math.floor(s / 3600), m = Math.floor(s / 60) % 60, sec = s % 60;
+    return (h ? h + ':' + pad(m) : m) + ':' + pad(sec);
+  }
+  function timerName(t) {
+    const ex = t.exId ? getExercises().find(x => x.id === t.exId) : null;
+    const c = catBy(t.cat);
+    return (c ? c.emoji + ' ' : '') + (ex ? ex.name : (c ? c.label : 'Session'));
+  }
+  function startTimer(cat, exId, targetMins) {
+    const running = getTimer();
+    if (running && !confirm('A timer is already running for ' + timerName(running) + '. Replace it?')) return;
+    store.set('timer', { cat, exId: exId || null, startedAt: Date.now(), accMs: 0, targetMins: targetMins || null, alerted: false });
+    switchScreen('home');
+    renderTimer();
+    toast('Timer started');
+  }
+  function pauseTimer() {
+    const t = getTimer(); if (!t) return;
+    if (t.startedAt) { t.accMs = timerElapsed(t); t.startedAt = null; } else { t.startedAt = Date.now(); }
+    store.set('timer', t); renderTimer();
+  }
+  function stopTimer() {
+    const t = getTimer(); if (!t) return;
+    const mins = Math.max(1, Math.round(timerElapsed(t) / 60000));
+    openModal('Log session', `
+      <div class="ex-note show">${escapeHtml(timerName(t))} · ${clock(timerElapsed(t))} on the timer</div>
+      <div class="field"><label>Minutes to log</label><input type="number" id="tmMins" min="1" inputmode="numeric" value="${mins}"></div>
+      <button class="btn primary" id="tmLog" style="margin-top:16px;">Log ${formatMins(mins)}</button>
+      <div style="text-align:center;margin-top:8px;"><button class="btn danger-text" id="tmDiscard">Discard session</button></div>`, () => {
+      $('tmMins').addEventListener('input', () => { const v = parseInt($('tmMins').value, 10); $('tmLog').textContent = v > 0 ? 'Log ' + formatMins(v) : 'Log'; });
+      $('tmLog').addEventListener('click', () => {
+        const v = parseInt($('tmMins').value, 10);
+        if (!(v > 0)) { toast('Enter the minutes'); return; }
+        store.set('timer', null); closeModal(); addEntry(t.cat, t.exId, v); renderTimer();
+      });
+      $('tmDiscard').addEventListener('click', () => {
+        if (!confirm('Throw this session away without logging it?')) return;
+        store.set('timer', null); closeModal(); renderTimer(); toast('Session discarded');
+      });
+    });
+  }
+  function renderTimer() {
+    const el = $('timerCard'); if (!el) return;
+    const t = getTimer();
+    if (!t) { el.innerHTML = ''; return; }
+    const paused = !t.startedAt;
+    el.innerHTML = `
+      <div class="timer-card${paused ? ' paused' : ''}">
+        <div class="tm-top"><span class="tm-name">${escapeHtml(timerName(t))}</span><span class="tm-state">${paused ? 'Paused' : 'Running'}</span></div>
+        <div class="tm-clock" id="tmClock">${clock(timerElapsed(t))}</div>
+        ${t.targetMins ? `<div class="bar-track"><span class="bar-fill" id="tmBar" style="width:0%"></span></div><div class="tm-target" id="tmTarget"></div>` : ''}
+        <div class="tm-btns">
+          <button class="btn ghost" id="tmPause">${paused ? '▶ Resume' : '❚❚ Pause'}</button>
+          <button class="btn primary" id="tmStop">Stop &amp; log</button>
+        </div>
+      </div>`;
+    $('tmPause').addEventListener('click', pauseTimer);
+    $('tmStop').addEventListener('click', stopTimer);
+    tickTimer();
+  }
+  // Updates just the numbers once a second (cheap; no redraw).
+  function tickTimer() {
+    const t = getTimer(); if (!t || !$('tmClock')) return;
+    const ms = timerElapsed(t);
+    $('tmClock').textContent = clock(ms);
+    if (t.targetMins && $('tmBar')) {
+      const pct = Math.min(100, ms / (t.targetMins * 60000) * 100);
+      $('tmBar').style.width = pct + '%';
+      $('tmBar').classList.toggle('done', pct >= 100);
+      $('tmTarget').textContent = pct >= 100 ? `✓ ${formatMins(t.targetMins)} reached — keep going or stop & log` : `of ${formatMins(t.targetMins)}`;
+      if (pct >= 100 && !t.alerted) {
+        t.alerted = true; store.set('timer', t);
+        try { if (navigator.vibrate) navigator.vibrate([250, 120, 250]); } catch (e) {}
+        toast(`${formatMins(t.targetMins)} done ✓`);
+      }
+    }
+  }
+  setInterval(tickTimer, 1000);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) renderTimer(); });
+
   // Log sheet: pick an exercise in the category (optional), then a duration.
   function openLogSheet(cat, preselectExId) {
     const c = catBy(cat);
@@ -481,7 +583,8 @@
         ${[5, 10, 15, 20, 30, 45, 60, 90].map(m => `<button class="chip" data-m="${m}">${formatMins(m)}</button>`).join('')}
       </div>
       <div class="field"><label>Or custom minutes</label><input type="number" id="customMins" min="1" inputmode="numeric" placeholder="e.g. 25"></div>
-      <button class="btn primary" id="logBtn" style="margin-top:18px;">Log Time</button>`;
+      <button class="btn primary" id="logBtn" style="margin-top:18px;">Log Time</button>
+      <button class="btn ghost" id="timerStartBtn" style="margin-top:8px;">▶ Start a timer instead</button>`;
 
     openModal(`${c.emoji}  ${c.label}`, body, () => {
       const showNote = () => {
@@ -506,6 +609,9 @@
       document.querySelectorAll('#minGrid .chip').forEach(b => b.addEventListener('click', () => { $('customMins').value = ''; setMins(parseInt(b.dataset.m, 10)); }));
       $('customMins').addEventListener('input', () => { const v = parseInt($('customMins').value, 10); setMins(v > 0 ? v : null); });
       $('newExFromLog').addEventListener('click', () => openExerciseEditor(null, cat, true));
+      $('timerStartBtn').addEventListener('click', () => {
+        closeModal(); startTimer(cat, selected, mins);
+      });
       $('logBtn').addEventListener('click', () => {
         if (!mins || mins <= 0) { toast('Pick a time first'); return; }
         addEntry(cat, selected, mins); closeModal();
@@ -642,6 +748,7 @@
             <div class="name">${escapeHtml(x.name)}</div>
             <div class="sub">${x.mins ? formatMins(x.mins) : 'No default time'}${x.notes ? ' · ' + escapeHtml(x.notes) : ''}</div>
           </div>
+          <button class="log-btn tm" data-timeex="${x.id}" data-timecat="${c.key}" aria-label="Start timer">▶</button>
           <button class="log-btn" data-logex="${x.id}" data-logcat="${c.key}">Log</button>
         </div>`).join('') : `<div class="ex-empty">No exercises yet.</div>`;
       return `
@@ -651,6 +758,10 @@
 
     document.querySelectorAll('[data-edit]').forEach(el => el.addEventListener('click', () => openExerciseEditor(el.dataset.edit)));
     document.querySelectorAll('[data-logex]').forEach(el => el.addEventListener('click', () => openLogSheet(el.dataset.logcat, el.dataset.logex)));
+    document.querySelectorAll('[data-timeex]').forEach(el => el.addEventListener('click', () => {
+      const ex = getExercises().find(x => x.id === el.dataset.timeex);
+      startTimer(el.dataset.timecat, el.dataset.timeex, ex && ex.mins);
+    }));
     document.querySelectorAll('[data-addcat]').forEach(el => el.addEventListener('click', () => openExerciseEditor(null, el.dataset.addcat)));
   }
   $('addExerciseBtn').addEventListener('click', () => openExerciseEditor(null, 'reading'));
@@ -754,12 +865,13 @@
   function boot() {
     migrate();
     onScreenEnter = (name) => {
-      if (name === 'home') renderHome();
+      if (name === 'home') { renderHome(); renderTimer(); }
       if (name === 'exercises') renderExercises();
       if (name === 'history') renderHistory();
       if (name === 'targets') renderTargets();
     };
     renderHome();
+    renderTimer();
   }
 
   boot();
@@ -875,6 +987,64 @@ if ('serviceWorker' in navigator) { window.addEventListener('load', function () 
   function start() { askToKeepData(); setTimeout(run, 3000); }
   if (document.readyState === 'complete') start();
   else window.addEventListener('load', start);
+})();
+</script>
+<!-- ============================================================
+     BACKUP STATUS CARD
+     Identical in every app. Put <div id="backupStatus"></div> wherever
+     the app should show it (usually its settings/targets screen) and
+     this fills it in: when everything was last backed up, and a
+     "Back up now" button. Needs the ECOSYSTEM AUTO-BACKUP block above.
+     ============================================================ -->
+<script>
+(function () {
+  "use strict";
+  function ago(iso) {
+    var t = new Date(iso).getTime();
+    if (!t || isNaN(t)) return null;
+    var m = Math.round((Date.now() - t) / 60000);
+    if (m < 2) return 'just now';
+    if (m < 60) return m + ' minutes ago';
+    var h = Math.round(m / 60);
+    if (h < 24) return h + (h === 1 ? ' hour ago' : ' hours ago');
+    var d = Math.round(h / 24);
+    return d + (d === 1 ? ' day ago' : ' days ago');
+  }
+  function render(msg, tone) {
+    var el = document.getElementById('backupStatus');
+    if (!el || !window.ecosystemBackup) return;
+    var b = window.ecosystemBackup, last = null;
+    try { last = localStorage.getItem(b.stampKey); } catch (e) {}
+    var set = !!b.relay();
+    var age = last ? (Date.now() - new Date(last).getTime()) / 3600000 : null;
+    var line = !set ? 'Backups aren’t set up on this phone yet — add your relay in Finance → Settings.'
+             : last ? 'Everything your apps hold on this phone was last backed up ' + ago(last) + '.'
+             : 'Nothing backed up yet. One goes automatically a few seconds after you open any app.';
+    var warn = set && (age === null || age > 48);
+    el.innerHTML =
+      '<div style="background:var(--bg-raised,var(--surface));border:1px solid var(--line,var(--surface2));border-radius:14px;padding:14px 16px;">' +
+        '<div style="font-size:13px;line-height:1.55;color:' + (warn ? 'var(--accent,var(--gold))' : 'var(--ink-soft,var(--muted))') + ';">' +
+          (warn && last ? '⚠ ' : '') + line + '</div>' +
+        (set ? '<button type="button" id="backupNowBtn2" style="margin-top:10px;width:100%;padding:11px;border-radius:12px;' +
+                 'background:var(--surface2);border:1px solid var(--line,var(--faint));color:var(--ink);font:inherit;font-size:14px;font-weight:700;cursor:pointer;">Back up now</button>' : '') +
+        (msg ? '<div style="margin-top:8px;font-size:12px;font-weight:700;color:' + (tone === 'bad' ? 'var(--warn,var(--danger))' : 'var(--good,#5FBF6E)') + ';">' + msg + '</div>' : '') +
+      '</div>';
+    var btn = document.getElementById('backupNowBtn2');
+    if (btn) btn.addEventListener('click', function () {
+      btn.disabled = true; btn.textContent = 'Backing up…';
+      b.send().then(function () { render('Backed up ✓', 'ok'); })
+              .catch(function (e) { render('Couldn’t back up: ' + (e && e.message ? e.message : 'unknown error'), 'bad'); });
+    });
+  }
+  window.renderBackupStatus = function () { render(); };
+  // Refresh whenever the card's screen is shown or the app comes back to the front.
+  new MutationObserver(function () {
+    var el = document.getElementById('backupStatus');
+    if (el && !el.dataset.done && el.offsetParent !== null) { el.dataset.done = '1'; render(); }
+    else if (el && el.offsetParent === null) { delete el.dataset.done; }
+  }).observe(document.body, { subtree: true, attributes: true, attributeFilter: ['class'], childList: true });
+  document.addEventListener('visibilitychange', function () { if (!document.hidden) render(); });
+  if (document.readyState === 'complete') render(); else window.addEventListener('load', render);
 })();
 </script>
 </body>
