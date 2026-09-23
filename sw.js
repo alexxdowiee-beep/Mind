@@ -1,5 +1,5 @@
 // Forge Mind service worker - offline support
-const CACHE = 'mind-v3';
+const CACHE = 'mind-v4';
 const ASSETS = ['./', './index.html', './manifest.json', './icon-192.png', './icon-512.png', './icon-maskable-512.png'];
 
 self.addEventListener('install', e => {
