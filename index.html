@@ -406,6 +406,50 @@
     return streak;
   }
 
+  // ---------- ecosystem summary: the only thing the Dashboard app reads ----------
+  // Written to a fixed key ("mind_summary") every time the Home screen
+  // refreshes — which happens after every log, edit, delete and target
+  // change — so the Dashboard always sees current numbers. See the
+  // "App Bundle: Data Sharing Spec" for the shared contract this follows.
+  // Bump SUMMARY_VERSION only if a field below is renamed or removed.
+  const SUMMARY_VERSION = 1;
+
+  // Days in a row with anything logged. Today only counts once something
+  // is logged, so an empty morning doesn't break yesterday's streak.
+  function dayStreak() {
+    const days = new Set(getEntries().filter(e => e.mins > 0).map(e => e.date));
+    const d = new Date();
+    if (!days.has(ymd(d))) d.setDate(d.getDate() - 1);
+    let n = 0;
+    while (days.has(ymd(d)) && n < 3650) { n++; d.setDate(d.getDate() - 1); }
+    return n;
+  }
+
+  function publishSummary(totals, targets, pct, weekStreak) {
+    try {
+      const done = sum(totals), target = sum(targets);
+      const todayMins = getEntries().filter(e => e.date === ymd(new Date())).reduce((a, e) => a + (e.mins || 0), 0);
+      const headline = done > 0
+        ? `${formatMins(done)} of ${formatMins(target)} this week (${pct}%)`
+        : 'Nothing logged this week yet';
+      localStorage.setItem('mind_summary', JSON.stringify({
+        schemaVersion: SUMMARY_VERSION,
+        updatedAt: new Date().toISOString(),
+        appId: 'mind',
+        headline: headline,
+        data: {
+          weekMinutesLogged: done,
+          weekMinutesTarget: target,
+          weekPercent: pct,
+          todayMinutes: todayMins,
+          loggedToday: todayMins > 0,
+          currentStreakDays: dayStreak(),
+          currentStreakWeeks: weekStreak
+        }
+      }));
+    } catch (e) { /* never let the summary break the app */ }
+  }
+
   // ---------- logging ----------
   function addEntry(cat, exId, mins) {
     const entries = getEntries();
@@ -504,6 +548,7 @@
     $('metaTarget').textContent = formatMins(sum(targets));
     const s = computeStreak();
     $('metaStreak').textContent = `🔥 ${s} wk${s === 1 ? '' : 's'}`;
+    publishSummary(totals, targets, pct, s);
 
     // This week's individual entries (newest first) with delete, so mistakes can be undone
     const list = getEntries().filter(e => weekKey(parseYmd(e.date)) === key).reverse();
