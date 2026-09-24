@@ -457,7 +457,23 @@
           todayMinutes: todayMins,
           loggedToday: todayMins > 0,
           currentStreakDays: dayStreak(),
-          currentStreakWeeks: weekStreak
+          currentStreakWeeks: weekStreak,
+          // ---- detail for the Dashboard's charts and suggestions ----
+          byCategory: CATEGORIES.map(c => {
+            const done = getEntries().filter(e => e.cat === c.key && e.mins > 0).map(e => e.date).sort();
+            return { key: c.key, label: c.label, mins: totals[c.key] || 0, target: targets[c.key] || 0,
+                     lastDone: done.length ? done[done.length - 1] : null };
+          }),
+          weeklyTotals: (function () {           // last 8 weeks, oldest first
+            const out = [], cur = weekStart(new Date());
+            for (let i = 7; i >= 0; i--) {
+              const d = new Date(cur); d.setDate(d.getDate() - i * 7);
+              const t = weekTotals(ymd(d));
+              out.push({ week: ymd(d), mins: sum(t), target: sum(targets) });
+            }
+            return out;
+          })(),
+          activeDates: [...new Set(getEntries().filter(e => e.mins > 0 && (Date.now() - parseYmd(e.date).getTime()) < 70 * 864e5).map(e => e.date))].sort()
         }
       }));
     } catch (e) { /* never let the summary break the app */ }
