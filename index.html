@@ -143,7 +143,7 @@
   .cat-list { display:flex; flex-direction:column; gap:8px; }
   .cat-card { background: var(--bg-raised); border: 1px solid var(--line); border-radius: var(--radius-md); padding: 13px 14px; display:flex; align-items:center; gap:12px; cursor:pointer; text-align:left; width:100%; color: var(--ink); }
   .cat-card:active { border-color: var(--brand); }
-  .cat-emoji { font-size: 21px; width:30px; text-align:center; flex-shrink:0; }
+  .cat-emoji { font-size: 20px; width:38px; height:38px; border-radius:10px; background: rgba(240,180,41,.14); color: var(--accent); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
   .cat-body { flex:1; min-width:0; display:block; }
   .cat-top { display:flex; justify-content:space-between; align-items:baseline; gap:8px; }
   .cat-name { font-size:15px; font-weight:700; }
@@ -204,6 +204,12 @@
   .target-row .t-input input { text-align:right; }
   .target-row .t-unit { font-size:12px; color: var(--ink-soft); width:28px; }
   .note { font-size: 12px; color: var(--ink-faint); margin-top: 10px; line-height: 1.5; }
+
+  /* Shared icon set (Phosphor Bold, MIT licence) */
+  .ci { width:1em; height:1em; display:inline-block; vertical-align:-0.14em; flex:none; }
+  .tab .ic { line-height:0; padding:4px 14px; }
+  .tab .ic .ci { width:22px; height:22px; display:block; }
+  .empty-state .emoji .ci { color: var(--ink-soft, var(--muted)); }
 </style>
 </head>
 <body>
@@ -264,10 +270,10 @@
 
   <nav class="tabbar">
     <div class="tabbar-inner">
-      <button class="tab active" data-screen="home"><span class="ic">&#8962;</span><span class="lb">Home</span></button>
-      <button class="tab" data-screen="exercises"><span class="ic">✦</span><span class="lb">Exercises</span></button>
-      <button class="tab" data-screen="history"><span class="ic">&#8801;</span><span class="lb">History</span></button>
-      <button class="tab" data-screen="targets"><span class="ic">&#9881;</span><span class="lb">Settings</span></button>
+      <button class="tab active" data-screen="home"><span class="ic"><svg class="ci" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M222.14,105.85l-80-80a20,20,0,0,0-28.28,0l-80,80A19.86,19.86,0,0,0,28,120v96a12,12,0,0,0,12,12h64a12,12,0,0,0,12-12V164h24v52a12,12,0,0,0,12,12h64a12,12,0,0,0,12-12V120A19.86,19.86,0,0,0,222.14,105.85ZM204,204H164V152a12,12,0,0,0-12-12H104a12,12,0,0,0-12,12v52H52V121.65l76-76,76,76Z"/></svg></span><span class="lb">Home</span></button>
+      <button class="tab" data-screen="exercises"><span class="ic"><svg class="ci" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M199,125.31l-49.88-18.39L130.69,57a19.92,19.92,0,0,0-37.38,0L74.92,106.92,25,125.31a19.92,19.92,0,0,0,0,37.38l49.88,18.39L93.31,231a19.92,19.92,0,0,0,37.38,0l18.39-49.88L199,162.69a19.92,19.92,0,0,0,0-37.38Zm-63.38,35.16a12,12,0,0,0-7.11,7.11L112,212.28l-16.47-44.7a12,12,0,0,0-7.11-7.11L43.72,144l44.7-16.47a12,12,0,0,0,7.11-7.11L112,75.72l16.47,44.7a12,12,0,0,0,7.11,7.11L180.28,144ZM140,40a12,12,0,0,1,12-12h12V16a12,12,0,0,1,24,0V28h12a12,12,0,0,1,0,24H188V64a12,12,0,0,1-24,0V52H152A12,12,0,0,1,140,40ZM252,88a12,12,0,0,1-12,12h-4v4a12,12,0,0,1-24,0v-4h-4a12,12,0,0,1,0-24h4V72a12,12,0,0,1,24,0v4h4A12,12,0,0,1,252,88Z"/></svg></span><span class="lb">Exercises</span></button>
+      <button class="tab" data-screen="history"><span class="ic"><svg class="ci" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M140,80v41.21l34.17,20.5a12,12,0,1,1-12.34,20.58l-40-24A12,12,0,0,1,116,128V80a12,12,0,0,1,24,0ZM128,28A99.38,99.38,0,0,0,57.24,57.34c-4.69,4.74-9,9.37-13.24,14V64a12,12,0,0,0-24,0v40a12,12,0,0,0,12,12H72a12,12,0,0,0,0-24H57.77C63,86,68.37,80.22,74.26,74.26a76,76,0,1,1,1.58,109,12,12,0,0,0-16.48,17.46A100,100,0,1,0,128,28Z"/></svg></span><span class="lb">History</span></button>
+      <button class="tab" data-screen="targets"><span class="ic"><svg class="ci" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M128,76a52,52,0,1,0,52,52A52.06,52.06,0,0,0,128,76Zm0,80a28,28,0,1,1,28-28A28,28,0,0,1,128,156Zm113.86-49.57A12,12,0,0,0,236,98.34L208.21,82.49l-.11-31.31a12,12,0,0,0-4.25-9.12,116,116,0,0,0-38-21.41,12,12,0,0,0-9.68.89L128,37.27,99.83,21.53a12,12,0,0,0-9.7-.9,116.06,116.06,0,0,0-38,21.47,12,12,0,0,0-4.24,9.1l-.14,31.34L20,98.35a12,12,0,0,0-5.85,8.11,110.7,110.7,0,0,0,0,43.11A12,12,0,0,0,20,157.66l27.82,15.85.11,31.31a12,12,0,0,0,4.25,9.12,116,116,0,0,0,38,21.41,12,12,0,0,0,9.68-.89L128,218.73l28.14,15.74a12,12,0,0,0,9.7.9,116.06,116.06,0,0,0,38-21.47,12,12,0,0,0,4.24-9.1l.14-31.34,27.81-15.81a12,12,0,0,0,5.85-8.11A110.7,110.7,0,0,0,241.86,106.43Zm-22.63,33.18-26.88,15.28a11.94,11.94,0,0,0-4.55,4.59c-.54,1-1.11,1.93-1.7,2.88a12,12,0,0,0-1.83,6.31L184.13,199a91.83,91.83,0,0,1-21.07,11.87l-27.15-15.19a12,12,0,0,0-5.86-1.53h-.29c-1.14,0-2.3,0-3.44,0a12.08,12.08,0,0,0-6.14,1.51L93,210.82A92.27,92.27,0,0,1,71.88,199l-.11-30.24a12,12,0,0,0-1.83-6.32c-.58-.94-1.16-1.91-1.7-2.88A11.92,11.92,0,0,0,63.7,155L36.8,139.63a86.53,86.53,0,0,1,0-23.24l26.88-15.28a12,12,0,0,0,4.55-4.58c.54-1,1.11-1.94,1.7-2.89a12,12,0,0,0,1.83-6.31L71.87,57A91.83,91.83,0,0,1,92.94,45.17l27.15,15.19a11.92,11.92,0,0,0,6.15,1.52c1.14,0,2.3,0,3.44,0a12.08,12.08,0,0,0,6.14-1.51L163,45.18A92.27,92.27,0,0,1,184.12,57l.11,30.24a12,12,0,0,0,1.83,6.32c.58.94,1.16,1.91,1.7,2.88A11.92,11.92,0,0,0,192.3,101l26.9,15.33A86.53,86.53,0,0,1,219.23,139.61Z"/></svg></span><span class="lb">Settings</span></button>
     </div>
   </nav>
 </div>
@@ -283,6 +289,8 @@
 
 <script>
 
+
+  var ICON = {"book-open": "<svg class=\"ci\" viewBox=\"0 0 256 256\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M232,44H160a43.86,43.86,0,0,0-32,13.85A43.86,43.86,0,0,0,96,44H24A12,12,0,0,0,12,56V200a12,12,0,0,0,12,12H96a20,20,0,0,1,20,20,12,12,0,0,0,24,0,20,20,0,0,1,20-20h72a12,12,0,0,0,12-12V56A12,12,0,0,0,232,44ZM96,188H36V68H96a20,20,0,0,1,20,20V192.81A43.79,43.79,0,0,0,96,188Zm124,0H160a43.71,43.71,0,0,0-20,4.83V88a20,20,0,0,1,20-20h60Z\"/></svg>", "brain": "<svg class=\"ci\" viewBox=\"0 0 256 256\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M252,124a60.14,60.14,0,0,0-32-53.08,52,52,0,0,0-92-32.11A52,52,0,0,0,36,70.92a60,60,0,0,0,0,106.14,52,52,0,0,0,92,32.13,52,52,0,0,0,92-32.13A60.05,60.05,0,0,0,252,124ZM88,204a28,28,0,0,1-26.85-20.07c1,0,1.89.07,2.85.07h8a12,12,0,0,0,0-24H64A36,36,0,0,1,52,90.05a12,12,0,0,0,8-11.32V72a28,28,0,0,1,56,0v60.18a51.61,51.61,0,0,0-7.2-3.85,12,12,0,1,0-9.6,22A28,28,0,0,1,88,204Zm104-44h-8a12,12,0,0,0,0,24h8c1,0,1.9,0,2.85-.07a28,28,0,1,1-38-33.61,12,12,0,1,0-9.6-22,51.61,51.61,0,0,0-7.2,3.85V72a28,28,0,0,1,56,0v6.73a12,12,0,0,0,8,11.32,36,36,0,0,1-12,70Zm16-44a12,12,0,0,1-12,12,40,40,0,0,1-40-40V84a12,12,0,0,1,24,0v4a16,16,0,0,0,16,16A12,12,0,0,1,208,116ZM100,88a40,40,0,0,1-40,40,12,12,0,0,1,0-24A16,16,0,0,0,76,88V84a12,12,0,0,1,24,0Z\"/></svg>", "target": "<svg class=\"ci\" viewBox=\"0 0 256 256\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M229.26,90.4a108,108,0,0,1-177.63,114A108,108,0,0,1,195.41,43.63l20.1-20.11a12,12,0,0,1,17,17l-96,96a12,12,0,1,1-17-17l24-24a36,36,0,1,0,19.76,39.65,12,12,0,0,1,23.53,4.74,60,60,0,1,1-25.73-62L178.3,60.74a84,84,0,1,0,28.46,38,12,12,0,1,1,22.5-8.35Z\"/></svg>", "flower-lotus": "<svg class=\"ci\" viewBox=\"0 0 256 256\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M249.3,119.63a19.51,19.51,0,0,0-12-9.2A76,76,0,0,0,218.92,108a92.19,92.19,0,0,0-3-42,20.15,20.15,0,0,0-23.44-13.57A88.39,88.39,0,0,0,166.3,62.8,98,98,0,0,0,140,32,20.07,20.07,0,0,0,116,32,98,98,0,0,0,89.7,62.8,88.39,88.39,0,0,0,63.55,52.42,20.15,20.15,0,0,0,40.11,66a92.19,92.19,0,0,0-3,42,76,76,0,0,0-18.41,2.43,19.51,19.51,0,0,0-12,9.2,20,20,0,0,0-2,15.31c3.55,13.16,14.4,38.16,47.14,57.72C84.16,212,112.76,212,128.08,212s43.76,0,76.07-19.34c32.74-19.56,43.59-44.56,47.14-57.72A20,20,0,0,0,249.3,119.63ZM64.16,172.05c-22.29-13.32-31.35-29.13-35-39.35a57.54,57.54,0,0,1,14.54-.46,134,134,0,0,0,8.55,17.69,142.54,142.54,0,0,0,19.59,26.32C69.3,175,66.74,173.6,64.16,172.05ZM79,147.27c-2.1-3-4.12-6-6-9.29C57.37,110.7,58.84,88.94,62,76.76A69,69,0,0,1,80.5,85.33,124.18,124.18,0,0,0,76,119.17,127.59,127.59,0,0,0,79,147.27Zm49,38c-9.72-8.07-28-28.28-28-66.13,0-37.42,18-57.7,28-66.08,10,8.38,28,28.66,28,66.08C156,157,137.72,177.23,128,185.3Zm49-38a127.59,127.59,0,0,0,3-28.1,124.18,124.18,0,0,0-4.5-33.84A69.08,69.08,0,0,1,194,76.75c3.13,12.19,4.6,34-11.06,61.23C181.1,141.23,179.08,144.32,177,147.27Zm14.86,24.78c-2.56,1.53-5.09,2.91-7.58,4.16a142.54,142.54,0,0,0,19.51-26.28,134,134,0,0,0,8.55-17.69,57.54,57.54,0,0,1,14.54.46C223.19,142.92,214.13,158.73,191.84,172.05Z\"/></svg>", "wind": "<svg class=\"ci\" viewBox=\"0 0 256 256\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M24,104a12,12,0,0,1,0-24h96a12,12,0,0,0,0-24,15.07,15.07,0,0,0-10.26,4.45,12,12,0,0,1-17-16.9A39.34,39.34,0,0,1,120,32a36,36,0,0,1,0,72ZM208,68a39.34,39.34,0,0,0-27.3,11.55,12,12,0,0,0,17,16.9A15.07,15.07,0,0,1,208,92a12,12,0,0,1,0,24H32a12,12,0,0,0,0,24H208a36,36,0,0,0,0-72Zm-56,84H40a12,12,0,0,0,0,24H152a12,12,0,0,1,0,24,15.11,15.11,0,0,1-10.27-4.45,12,12,0,1,0-17,16.9A39.34,39.34,0,0,0,152,224a36,36,0,0,0,0-72Z\"/></svg>", "puzzle-piece": "<svg class=\"ci\" viewBox=\"0 0 256 256\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M222.41,155.16a12,12,0,0,0-11.56-.69A16,16,0,0,1,188,139,16.2,16.2,0,0,1,202.8,124a15.83,15.83,0,0,1,8,1.5A12,12,0,0,0,228,114.7V72a20,20,0,0,0-20-20H176a40.15,40.15,0,0,0-12.62-29.16,39.67,39.67,0,0,0-29.94-10.76,40.08,40.08,0,0,0-37.34,37C96,50.07,96,51,96,52H64A20,20,0,0,0,44,72v28a40.15,40.15,0,0,0-29.16,12.62A40,40,0,0,0,41.1,179.9a28.3,28.3,0,0,0,2.9.1v28a20,20,0,0,0,20,20H208a20,20,0,0,0,20-20V165.31A12,12,0,0,0,222.41,155.16ZM204,204H68V165.31a12,12,0,0,0-17.15-10.84A15.9,15.9,0,0,1,42.8,156,16.2,16.2,0,0,1,28,141.06a16,16,0,0,1,22.82-15.52A12,12,0,0,0,68,114.7V76h42.7a12,12,0,0,0,10.83-17.15A15.9,15.9,0,0,1,120,50.8,16.19,16.19,0,0,1,134.94,36a16,16,0,0,1,15.53,22.81A12,12,0,0,0,161.31,76H204v24c-1,0-1.93,0-2.9.11A40,40,0,0,0,204,180h0Z\"/></svg>", "fire": "<svg class=\"ci\" viewBox=\"0 0 256 256\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M177.62,159.6a52,52,0,0,1-34,34,12.2,12.2,0,0,1-3.6.55,12,12,0,0,1-3.6-23.45,28,28,0,0,0,18.32-18.32,12,12,0,0,1,22.9,7.2ZM220,144a92,92,0,0,1-184,0c0-28.81,11.27-58.18,33.48-87.28a12,12,0,0,1,17.9-1.33L107.07,74.5,127,19.89a12,12,0,0,1,18.94-5.12C168.2,33.25,220,82.85,220,144Zm-24,0c0-41.71-30.61-78.39-52.52-99.29l-20.21,55.4a12,12,0,0,1-19.63,4.5L80.71,82.36C67,103.38,60,124.06,60,144a68,68,0,0,0,136,0Z\"/></svg>", "clock-counter-clockwise": "<svg class=\"ci\" viewBox=\"0 0 256 256\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M140,80v41.21l34.17,20.5a12,12,0,1,1-12.34,20.58l-40-24A12,12,0,0,1,116,128V80a12,12,0,0,1,24,0ZM128,28A99.38,99.38,0,0,0,57.24,57.34c-4.69,4.74-9,9.37-13.24,14V64a12,12,0,0,0-24,0v40a12,12,0,0,0,12,12H72a12,12,0,0,0,0-24H57.77C63,86,68.37,80.22,74.26,74.26a76,76,0,1,1,1.58,109,12,12,0,0,0-16.48,17.46A100,100,0,1,0,128,28Z\"/></svg>"};
   // Shared date format across all apps (NZ style): "Thu 24 Sep", "24 Sep", "24 September", "Thursday"
   function fmtDate(d, opt) {
     var DS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'], DL = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
@@ -350,12 +358,12 @@
      ============================================================ */
 
   const CATEGORIES = [
-    { key: 'reading',    label: 'Reading',        emoji: '📖' },
-    { key: 'learning',   label: 'Learning',       emoji: '🧠' },
-    { key: 'focus',      label: 'Focus Training', emoji: '🎯' },
-    { key: 'meditation', label: 'Meditation',     emoji: '🧘' },
-    { key: 'breathing',  label: 'Breathing',      emoji: '🌬️' },
-    { key: 'braingames', label: 'Brain Games',    emoji: '🧩' }
+    { key: 'reading',    label: 'Reading',        emoji: '📖', icon: ICON['book-open'] },
+    { key: 'learning',   label: 'Learning',       emoji: '🧠', icon: ICON['brain'] },
+    { key: 'focus',      label: 'Focus Training', emoji: '🎯', icon: ICON['target'] },
+    { key: 'meditation', label: 'Meditation',     emoji: '🧘', icon: ICON['flower-lotus'] },
+    { key: 'breathing',  label: 'Breathing',      emoji: '🌬️', icon: ICON['wind'] },
+    { key: 'braingames', label: 'Brain Games',    emoji: '🧩', icon: ICON['puzzle-piece'] }
   ];
   const catBy = (k) => CATEGORIES.find(c => c.key === k);
 
@@ -519,7 +527,7 @@
   function timerName(t) {
     const ex = t.exId ? getExercises().find(x => x.id === t.exId) : null;
     const c = catBy(t.cat);
-    return (c ? c.emoji + ' ' : '') + (ex ? ex.name : (c ? c.label : 'Session'));
+    return (ex ? ex.name : (c ? c.label : 'Session'));
   }
   function startTimer(cat, exId, targetMins) {
     const running = getTimer();
@@ -617,7 +625,7 @@
       <button class="btn primary" id="logBtn" style="margin-top:18px;">Log Time</button>
       <button class="btn ghost" id="timerStartBtn" style="margin-top:8px;">▶ Start a timer instead</button>`;
 
-    openModal(`${c.emoji}  ${c.label}`, body, () => {
+    openModal(`${c.label}`, body, () => {
       const showNote = () => {
         const ex = exs.find(x => x.id === selected);
         const n = $('exNote');
@@ -667,7 +675,7 @@
       const n = exs.filter(x => x.cat === c.key).length;
       return `
         <button class="cat-card" data-cat="${c.key}">
-          <span class="cat-emoji">${c.emoji}</span>
+          <span class="cat-emoji">${c.icon}</span>
           <span class="cat-body">
             <span class="cat-top"><span class="cat-name">${c.label}</span><span class="cat-amt">${formatMins(done)} <span>/ ${formatMins(target)}</span></span></span>
             <span class="cat-sub">${n} exercise${n === 1 ? '' : 's'}</span>
@@ -684,20 +692,20 @@
     $('metaDone').textContent = formatMins(sum(totals));
     $('metaTarget').textContent = formatMins(sum(targets));
     const s = computeStreak();
-    $('metaStreak').textContent = `🔥 ${s} wk${s === 1 ? '' : 's'}`;
+    $('metaStreak').innerHTML = `${ICON.fire} ${s} wk${s === 1 ? '' : 's'}`;
     publishSummary(totals, targets, pct, s);
 
     // This week's individual entries (newest first) with delete, so mistakes can be undone
     const list = getEntries().filter(e => weekKey(parseYmd(e.date)) === key).reverse();
     if (!list.length) {
-      $('weekLog').innerHTML = `<div class="empty-state"><div class="emoji">🧠</div><p>Nothing logged yet this week.</p><p>Tap a category above to start.</p></div>`;
+      $('weekLog').innerHTML = `<div class="empty-state"><div class="emoji">${ICON.brain}</div><p>Nothing logged yet this week.</p><p>Tap a category above to start.</p></div>`;
       return;
     }
     $('weekLog').innerHTML = `<div class="card" style="padding:2px 14px;">${list.map(e => {
       const c = catBy(e.cat); const ex = e.exId ? exs.find(x => x.id === e.exId) : null;
       const day = fmtDate(parseYmd(e.date), { weekday: 'short', day: 'numeric', month: 'short' });
       return `<div class="log-item tappable" data-edit="${e.id}">
-          <span class="cat-emoji">${c ? c.emoji : '•'}</span>
+          <span class="cat-emoji">${c ? c.icon : '•'}</span>
           <div class="info"><div class="name">${escapeHtml(ex ? ex.name : (c ? c.label : 'Entry'))}</div><div class="sub">${day}${ex ? ' · ' + c.label : ''}</div></div>
           <span class="mins">${formatMins(e.mins)}</span>
           <button class="icon-btn" data-del="${e.id}" aria-label="Delete">✕</button>
@@ -731,7 +739,7 @@
     const body = `
       <div class="step-label">Category</div>
       <div class="chip-row" id="edCats">
-        ${CATEGORIES.map(c => `<button class="chip${c.key === cat ? ' active' : ''}" data-ecat="${c.key}">${c.emoji} ${c.label}</button>`).join('')}
+        ${CATEGORIES.map(c => `<button class="chip${c.key === cat ? ' active' : ''}" data-ecat="${c.key}">${c.icon} ${c.label}</button>`).join('')}
       </div>
       <div class="step-label">Exercise</div>
       <div class="chip-row" id="edExs">${exChipsFor(cat)}</div>
@@ -783,7 +791,7 @@
           <button class="log-btn" data-logex="${x.id}" data-logcat="${c.key}">Log</button>
         </div>`).join('') : `<div class="ex-empty">No exercises yet.</div>`;
       return `
-        <div class="group-head"><h3>${c.emoji} ${c.label}</h3><button class="add-mini" data-addcat="${c.key}">+ Add</button></div>
+        <div class="group-head"><h3>${c.icon} ${c.label}</h3><button class="add-mini" data-addcat="${c.key}">+ Add</button></div>
         <div>${rows}</div>`;
     }).join('');
 
@@ -805,7 +813,7 @@
       <div class="field"><label>Name</label><input type="text" id="exName" maxlength="60" placeholder="e.g. Box breathing" value="${escapeHtml(existing ? existing.name : '')}"></div>
       <div class="step-label">Category</div>
       <div class="chip-row" id="catChips">
-        ${CATEGORIES.map(c => `<button class="chip${c.key === cat ? ' active' : ''}" data-c="${c.key}">${c.emoji} ${c.label}</button>`).join('')}
+        ${CATEGORIES.map(c => `<button class="chip${c.key === cat ? ' active' : ''}" data-c="${c.key}">${c.icon} ${c.label}</button>`).join('')}
       </div>
       <div class="field"><label>Usual time (minutes, optional)</label><input type="number" id="exMins" min="0" inputmode="numeric" placeholder="e.g. 10" value="${existing && existing.mins ? existing.mins : ''}"></div>
       <div class="field"><label>How to do it (optional)</label><textarea id="exNotes" maxlength="400" placeholder="Short instructions or a reminder">${escapeHtml(existing ? existing.notes : '')}</textarea></div>
@@ -845,7 +853,7 @@
     const targets = getTargets();
     const keys = [...new Set(getEntries().map(e => weekKey(parseYmd(e.date))))].sort().reverse();
     if (!keys.length) {
-      $('historyList').innerHTML = `<div class="empty-state"><div class="emoji">▤</div><p>No history yet.</p><p>Your weeks will appear here as you log time.</p></div>`;
+      $('historyList').innerHTML = `<div class="empty-state"><div class="emoji">${ICON["clock-counter-clockwise"]}</div><p>No history yet.</p><p>Your weeks will appear here as you log time.</p></div>`;
       return;
     }
     const now = thisWeekKey();
@@ -855,7 +863,7 @@
         <div class="week-card">
           <div class="week-head"><span class="range">${k === now ? 'This week' : weekRangeLabel(k)}</span><span class="pct${pct >= 100 ? ' done' : ''}">${pct}%${pct >= 100 ? ' ✓' : ''}</span></div>
           <div class="bar-track"><div class="bar-fill${pct >= 100 ? ' done' : ''}" style="width:${Math.min(pct, 100)}%"></div></div>
-          <div class="week-mini">${CATEGORIES.map(c => `<span>${c.emoji} <b>${formatMins(t[c.key])}</b></span>`).join('')}</div>
+          <div class="week-mini">${CATEGORIES.map(c => `<span>${c.icon} <b>${formatMins(t[c.key])}</b></span>`).join('')}</div>
         </div>`;
     }).join('');
   }
@@ -865,7 +873,7 @@
     const t = getTargets();
     $('targetList').innerHTML = CATEGORIES.map(c => `
       <div class="target-row">
-        <span class="te">${c.emoji}</span><span class="tl">${c.label}</span>
+        <span class="te">${c.icon}</span><span class="tl">${c.label}</span>
         <div class="t-input"><input type="number" min="0" inputmode="numeric" id="target_${c.key}" value="${t[c.key]}"><span class="t-unit">min</span></div>
       </div>`).join('');
   }
