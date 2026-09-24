@@ -264,10 +264,10 @@
 
   <nav class="tabbar">
     <div class="tabbar-inner">
-      <button class="tab active" data-screen="home"><span class="ic">◉</span><span class="lb">Home</span></button>
+      <button class="tab active" data-screen="home"><span class="ic">&#8962;</span><span class="lb">Home</span></button>
       <button class="tab" data-screen="exercises"><span class="ic">✦</span><span class="lb">Exercises</span></button>
-      <button class="tab" data-screen="history"><span class="ic">▤</span><span class="lb">History</span></button>
-      <button class="tab" data-screen="targets"><span class="ic">◎</span><span class="lb">Targets</span></button>
+      <button class="tab" data-screen="history"><span class="ic">&#8801;</span><span class="lb">History</span></button>
+      <button class="tab" data-screen="targets"><span class="ic">&#9881;</span><span class="lb">Settings</span></button>
     </div>
   </nav>
 </div>
@@ -282,6 +282,18 @@
 <div class="toast" id="toast"></div>
 
 <script>
+
+  // Shared date format across all apps (NZ style): "Thu 24 Sep", "24 Sep", "24 September", "Thursday"
+  function fmtDate(d, opt) {
+    var DS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'], DL = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+    var MS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    var ML = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    opt = opt || {}; var out = [];
+    if (opt.weekday) out.push(opt.weekday === 'long' ? DL[d.getDay()] : DS[d.getDay()]);
+    if (opt.day) out.push(d.getDate());
+    if (opt.month) out.push(opt.month === 'long' ? ML[d.getMonth()] : MS[d.getMonth()]);
+    return out.join(' ');
+  }
 (function () {
   /* ============================================================
      SHARED HELPERS — identical across every app in the ecosystem.
@@ -382,7 +394,7 @@
   function weekRangeLabel(key) {
     const s = parseYmd(key); const e = new Date(s); e.setDate(e.getDate() + 6);
     const o = { month: 'short', day: 'numeric' };
-    return `${s.toLocaleDateString(undefined, o)} – ${e.toLocaleDateString(undefined, o)}`;
+    return s.getMonth() === e.getMonth() ? `${s.getDate()}–${fmtDate(e, o)}` : `${fmtDate(s, o)} – ${fmtDate(e, o)}`;
   }
 
   function formatMins(m) {
@@ -683,7 +695,7 @@
     }
     $('weekLog').innerHTML = `<div class="card" style="padding:2px 14px;">${list.map(e => {
       const c = catBy(e.cat); const ex = e.exId ? exs.find(x => x.id === e.exId) : null;
-      const day = parseYmd(e.date).toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'short' });
+      const day = fmtDate(parseYmd(e.date), { weekday: 'short', day: 'numeric', month: 'short' });
       return `<div class="log-item tappable" data-edit="${e.id}">
           <span class="cat-emoji">${c ? c.emoji : '•'}</span>
           <div class="info"><div class="name">${escapeHtml(ex ? ex.name : (c ? c.label : 'Entry'))}</div><div class="sub">${day}${ex ? ' · ' + c.label : ''}</div></div>
