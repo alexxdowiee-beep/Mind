@@ -210,6 +210,8 @@
   .tab .ic { line-height:0; padding:4px 14px; }
   .tab .ic .ci { width:22px; height:22px; display:block; }
   .empty-state .emoji .ci { color: var(--ink-soft, var(--muted)); }
+  .toast.has-undo { pointer-events:auto; display:flex; align-items:center; gap:16px; }
+  .toast-undo { background:none; border:none; padding:0; color: var(--brand); font: inherit; font-weight:800; text-transform:uppercase; letter-spacing:.04em; cursor:pointer; }
 </style>
 </head>
 <body>
@@ -229,7 +231,7 @@
             <circle class="ring-track" cx="59" cy="59" r="50"></circle>
             <circle class="ring-fill" id="ringFill" cx="59" cy="59" r="50" stroke-dasharray="314.16" stroke-dashoffset="314.16"></circle>
           </svg>
-          <div class="ring-center"><div class="num" id="ringPct">0%</div><div class="lbl">this week</div></div>
+          <div class="ring-center"><div class="num" id="ringPct">0%</div><div class="lbl" id="ringLbl">this week</div></div>
         </div>
         <div class="ring-meta">
           <div class="row"><span>Done</span><b id="metaDone">0m</b></div>
@@ -313,9 +315,16 @@
   const escapeHtml = (s) => String(s || '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
   let toastTimer;
-  function toast(msg) {
-    const t = $('toast'); t.textContent = msg; t.classList.add('show');
-    clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
+  // toast(msg) shows a short message; toast(msg, undoFn) adds an Undo button for 5 seconds.
+  function toast(msg, undo) {
+    const t = $('toast'); t.textContent = msg;
+    if (undo) {
+      const b = document.createElement('button'); b.className = 'toast-undo'; b.textContent = 'Undo';
+      b.addEventListener('click', () => { clearTimeout(toastTimer); t.classList.remove('show'); undo(); });
+      t.appendChild(b);
+    }
+    t.classList.toggle('has-undo', !!undo); t.classList.add('show');
+    clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('show'), undo ? 5000 : 2200);
   }
 
   const store = {
@@ -340,6 +349,7 @@
   document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => switchScreen(t.dataset.screen)));
 
   function openModal(title, bodyHtml, wireFn) {
+    $('toast').classList.remove('show');   // don't let an old message sit over the sheet's buttons
     $('genericModalTitle').textContent = title;
     $('genericModalBody').innerHTML = bodyHtml;
     $('genericModalScrim').classList.add('open');
@@ -529,9 +539,16 @@
     const c = catBy(t.cat);
     return (ex ? ex.name : (c ? c.label : 'Session'));
   }
-  function startTimer(cat, exId, targetMins) {
+  function startTimer(cat, exId, targetMins, replace) {
     const running = getTimer();
-    if (running && !confirm('A timer is already running for ' + timerName(running) + '. Replace it?')) return;
+    if (running && !replace) {
+      openModal('Timer already running', `<p style="color:var(--ink-soft);margin:0 0 16px">You have a timer going for <b style="color:var(--ink)">${escapeHtml(timerName(running))}</b>. Replace it with the new one?</p>` +
+        '<button class="btn primary" id="rpYes">Replace timer</button><button class="btn ghost" id="rpNo" style="margin-top:10px">Keep current timer</button>', () => {
+        $('rpYes').addEventListener('click', () => { closeModal(); startTimer(cat, exId, targetMins, true); });
+        $('rpNo').addEventListener('click', closeModal);
+      });
+      return;
+    }
     store.set('timer', { cat, exId: exId || null, startedAt: Date.now(), accMs: 0, targetMins: targetMins || null, alerted: false });
     switchScreen('home');
     renderTimer();
@@ -557,8 +574,9 @@
         store.set('timer', null); closeModal(); addEntry(t.cat, t.exId, v); renderTimer();
       });
       $('tmDiscard').addEventListener('click', () => {
-        if (!confirm('Throw this session away without logging it?')) return;
-        store.set('timer', null); closeModal(); renderTimer(); toast('Session discarded');
+        const prevTimer = getTimer();
+        store.set('timer', null); closeModal(); renderTimer();
+        toast('Session discarded', () => { store.set('timer', prevTimer); renderTimer(); });
       });
     });
   }
@@ -687,12 +705,14 @@
     document.querySelectorAll('[data-cat]').forEach(b => b.addEventListener('click', () => openLogSheet(b.dataset.cat)));
 
     const pct = weekPct(totals, targets);
-    $('ringPct').textContent = pct + '%';
+    const notStarted = sum(totals) === 0;
+    $('ringPct').textContent = notStarted ? '–' : pct + '%';
+    $('ringLbl').textContent = notStarted ? 'not started' : 'this week';
     $('ringFill').setAttribute('stroke-dashoffset', (314.16 * (1 - Math.min(pct, 100) / 100)).toFixed(2));
     $('metaDone').textContent = formatMins(sum(totals));
     $('metaTarget').textContent = formatMins(sum(targets));
     const s = computeStreak();
-    $('metaStreak').innerHTML = `${ICON.fire} ${s} wk${s === 1 ? '' : 's'}`;
+    $('metaStreak').textContent = `${s} wk${s === 1 ? '' : 's'}`;
     publishSummary(totals, targets, pct, s);
 
     // This week's individual entries (newest first) with delete, so mistakes can be undone
@@ -712,9 +732,10 @@
         </div>`;
     }).join('')}</div>`;
     document.querySelectorAll('[data-del]').forEach(b => b.addEventListener('click', () => {
-      if (!confirm('Delete this entry?')) return;
-      store.set('entries', getEntries().filter(e => e.id !== b.dataset.del));
-      toast('Entry deleted'); renderHome();
+      const prevEntries = getEntries();
+      store.set('entries', prevEntries.filter(e => e.id !== b.dataset.del));
+      renderHome();
+      toast('Entry deleted', () => { store.set('entries', prevEntries); renderHome(); });
     }));
     document.querySelectorAll('[data-edit]').forEach(row => row.addEventListener('click', (ev) => {
       if (ev.target.closest('[data-del]')) return;   // the X is its own shortcut
@@ -840,9 +861,10 @@
         if (reopenLog) openLogSheet(cat, savedId); else closeModal();
       });
       if (existing) $('delEx').addEventListener('click', () => {
-        if (!confirm(`Delete "${existing.name}"? Time you've already logged stays in your totals.`)) return;
-        store.set('exercises', getExercises().filter(x => x.id !== id));
-        toast('Exercise deleted'); closeModal(); renderExercises(); renderHome();
+        const prevEx = getExercises();
+        store.set('exercises', prevEx.filter(x => x.id !== id));
+        closeModal(); renderExercises(); renderHome();
+        toast('Exercise deleted', () => { store.set('exercises', prevEx); renderExercises(); renderHome(); });
       });
       if (!existing) setTimeout(() => $('exName').focus(), 50);
     });
