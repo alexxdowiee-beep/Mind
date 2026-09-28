@@ -210,7 +210,8 @@
   .tab .ic { line-height:0; padding:4px 14px; }
   .tab .ic .ci { width:22px; height:22px; display:block; }
   .empty-state .emoji .ci { color: var(--ink-soft, var(--muted)); }
-  .toast.has-undo { pointer-events:auto; display:flex; align-items:center; gap:16px; }
+  .toast.has-undo { display:flex; align-items:center; gap:16px; }
+  .toast.has-undo.show { pointer-events:auto; }
   .toast-undo { background:none; border:none; padding:0; color: var(--brand); font: inherit; font-weight:800; text-transform:uppercase; letter-spacing:.04em; cursor:pointer; }
   /* Only one solid orange button per screen: row buttons are grey, orange only while pressed */
   .ex-row .log-btn:not(.tm) { background: var(--surface2); color: var(--ink); border: 1px solid var(--line); }
