@@ -143,6 +143,11 @@
   .cat-list { display:flex; flex-direction:column; gap:8px; }
   .cat-card { background: var(--bg-raised); border: 1px solid var(--line); border-radius: var(--radius-md); padding: 13px 14px; display:flex; align-items:center; gap:12px; cursor:pointer; text-align:left; width:100%; color: var(--ink); }
   .cat-card:active { border-color: var(--brand); }
+  .sleep-card { background: var(--bg-raised); border:1px solid var(--line); border-radius: var(--radius-md); padding:14px 16px; margin-top:12px; }
+  .sl-top { display:flex; justify-content:space-between; align-items:baseline; }
+  .sl-k { font-weight:700; font-size:15px; } .sl-src { font-size:12px; color: var(--ink-faint); }
+  .sl-main { margin-top:6px; } .sl-main b { font-family: var(--font-display); font-weight:400; font-size:28px; } .sl-main span { color: var(--ink-soft); font-size:13px; }
+  .sl-sub { font-size:12px; color: var(--ink-soft); margin-top:2px; }
   .cat-emoji { font-size: 20px; width:38px; height:38px; border-radius:10px; background: rgba(240,180,41,.14); color: var(--accent); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
   .cat-body { flex:1; min-width:0; display:block; }
   .cat-top { display:flex; justify-content:space-between; align-items:baseline; gap:8px; }
@@ -216,6 +221,9 @@
   /* Only one solid orange button per screen: row buttons are grey, orange only while pressed */
   .ex-row .log-btn:not(.tm) { background: var(--surface2); color: var(--ink); border: 1px solid var(--line); }
   .ex-row .log-btn:not(.tm):active { background: var(--brand); color: var(--brand-ink); border-color: var(--brand); }
+
+  .hbars { display:flex; gap:4px; align-items:flex-end; height:30px; margin-top:8px; }
+  .hbars i { flex:1; border-radius:2px; min-height:3px; }
 </style>
 </head>
 <body>
@@ -244,6 +252,7 @@
         </div>
       </div>
 
+      <div id="sleepCard"></div>
       <div class="section-head"><h2>Weekly Progress</h2><span class="hint">tap to log</span></div>
       <div class="cat-list" id="catList"></div>
 
@@ -404,6 +413,43 @@
 
   // ---------- dates & weeks (Monday start, local time) ----------
   const pad = (n) => String(n).padStart(2, '0');
+
+  // ---- Steps and sleep from Samsung Health, via your relay's /health ----
+  // Samsung Health -> Health Connect -> "Health Connect Webhook" app -> relay.
+  // Shared by Forge (steps), Mind (sleep) and the Dashboard: same relay settings
+  // as Finance and one shared cache, so the relay is asked at most every 15 min.
+  var HEALTH_KEY = 'health_cache';
+  function healthData() { try { return JSON.parse(localStorage.getItem(HEALTH_KEY) || 'null'); } catch (e) { return null; } }
+  function refreshHealth(onNew) {
+    try {
+      var s = JSON.parse(localStorage.getItem('finance_settings') || 'null');
+      if (!s || !s.relayUrl || !s.relayKey) return;
+      var c = healthData();
+      if (c && Date.now() - (c.fetchedAt || 0) < 15 * 60000) return;
+      var base = String(s.relayUrl).trim().replace(/\/+$/, '');
+      if (!/^https?:\/\//i.test(base)) base = 'https://' + base;
+      fetch(base + '/health', { headers: { 'X-Relay-Key': s.relayKey } })
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (d) {
+          if (!d || !d.days) return;
+          d.fetchedAt = Date.now();
+          try { localStorage.setItem(HEALTH_KEY, JSON.stringify(d)); } catch (e) {}
+          if (onNew) onNew(d);
+        })
+        .catch(function () { /* offline or relay not updated yet - try again later */ });
+    } catch (e) {}
+  }
+  function healthLast7() {   // local dates, oldest first, ending today
+    var out = [], p = function (n) { return (n < 10 ? '0' : '') + n; };
+    for (var i = 6; i >= 0; i--) { var d = new Date(); d.setDate(d.getDate() - i); out.push(d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate())); }
+    return out;
+  }
+  function healthBars(vals, colour, fadeLast) {
+    var max = Math.max.apply(null, vals.concat([1]));
+    return '<div class="hbars">' + vals.map(function (v, i) {
+      return '<i style="height:' + Math.max(4, Math.round(v / max * 100)) + '%;background:' + colour + (fadeLast && i === vals.length - 1 ? ';opacity:.55' : '') + '"></i>';
+    }).join('') + '</div>';
+  }
   const ymd = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
   const parseYmd = (s) => { const [y, m, d] = s.split('-').map(Number); return new Date(y, m - 1, d); };
   function weekStart(d) {
@@ -510,6 +556,9 @@
             }
             return out;
           })(),
+          // for the Dashboard's weekly review: minutes logged on each of the last 70 days
+          dailyMins: getEntries().filter(e => e.mins > 0 && (Date.now() - parseYmd(e.date).getTime()) < 70 * 864e5)
+                       .reduce((acc, e) => { acc[e.date] = (acc[e.date] || 0) + e.mins; return acc; }, {}),
           activeDates: [...new Set(getEntries().filter(e => e.mins > 0 && (Date.now() - parseYmd(e.date).getTime()) < 70 * 864e5).map(e => e.date))].sort()
         }
       }));
@@ -682,7 +731,30 @@
   }
 
   // ---------- HOME ----------
+  // Last night's sleep from Samsung Health (hidden until data arrives).
+  function fmtClock12(iso) {
+    if (!iso) return '';
+    const d = new Date(iso); let h = d.getHours(); const m = d.getMinutes(), ap = h >= 12 ? 'pm' : 'am';
+    h = h % 12 || 12; return h + ':' + String(m).padStart(2, '0') + ap;
+  }
+  function renderSleep() {
+    const el = $('sleepCard'); if (!el) return;
+    refreshHealth(() => renderSleep());
+    const hd = healthData();
+    if (!hd || !hd.days) { el.innerHTML = ''; return; }
+    const days = healthLast7(), vals = days.map(k => (hd.days[k] || {}).sleepMin || 0);
+    if (!vals.some(Boolean)) { el.innerHTML = ''; return; }
+    const today = hd.days[days[6]] || {};
+    const logged = vals.filter(Boolean), avg = Math.round(logged.reduce((a, b) => a + b, 0) / logged.length);
+    el.innerHTML = `<div class="sleep-card">
+        <div class="sl-top"><span class="sl-k">Sleep</span><span class="sl-src">from Samsung Health</span></div>
+        <div class="sl-main"><b>${today.sleepMin ? formatMins(today.sleepMin) : '–'}</b> <span>${today.sleepMin ? 'last night' : 'nothing recorded last night'}</span></div>
+        <div class="sl-sub">${today.sleepStart ? fmtClock12(today.sleepStart) + ' – ' + fmtClock12(today.sleepEnd) + ' · ' : ''}7-night avg ${formatMins(avg)}</div>
+        ${healthBars(vals, 'var(--accent)', false)}
+      </div>`;
+  }
   function renderHome() {
+    renderSleep();
     const targets = getTargets();
     const key = thisWeekKey();
     const totals = weekTotals(key);
