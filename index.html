@@ -223,6 +223,17 @@
   .ex-row .log-btn:not(.tm):active { background: var(--brand); color: var(--brand-ink); border-color: var(--brand); }
 
   .hbars { display:flex; gap:4px; align-items:flex-end; height:30px; margin-top:8px; }
+  .sl-bars { height:40px; margin-top:12px; gap:6px; }
+  .sl-bars i { background: var(--accent); cursor:pointer; }
+  .sl-bars i.none { background: var(--surface2); height:3px !important; }
+  .sl-bars i.me { background: repeating-linear-gradient(45deg, var(--accent) 0 4px, #C99520 4px 7px); }
+  .sl-pill { font-size:11px; font-weight:600; color: var(--ink-soft); background: var(--surface2); border-radius:999px; padding:2px 8px; margin-left:8px; vertical-align:3px; }
+  .sl-edit { background:none; border:none; color: var(--ink-soft); font: inherit; font-size:12px; text-decoration:underline; padding:8px 0 0; cursor:pointer; }
+  .sl-when { margin:4px 0 0; font-size:13px; color: var(--ink-soft); }
+  .sl-times { display:flex; gap:10px; }
+  .sl-total { margin-top:12px; font-size:13px; color: var(--ink-soft); }
+  .sl-total b { font-family: var(--font-display); font-weight:400; font-size:20px; color: var(--ink); margin-left:4px; }
+  input[type=time] { background: var(--surface2); border: 1px solid var(--line); border-radius: 10px; padding: 10px 11px; font-size: 16px; font-family: inherit; color: var(--ink); width:100%; color-scheme: dark; }
   .hbars i { flex:1; border-radius:2px; min-height:3px; }
 </style>
 </head>
@@ -733,27 +744,96 @@
   }
 
   // ---------- HOME ----------
-  // Last night's sleep from Samsung Health (hidden until data arrives).
+  // Last night's sleep: from Samsung Health when it arrives, otherwise what you enter.
   function fmtClock12(iso) {
     if (!iso) return '';
     const d = new Date(iso); let h = d.getHours(); const m = d.getMinutes(), ap = h >= 12 ? 'pm' : 'am';
     h = h % 12 || 12; return h + ':' + String(m).padStart(2, '0') + ap;
   }
+  // Sleep you enter yourself (Samsung Health doesn't always share sleep).
+  // Shared key, no app prefix, so the Dashboard can read it too:
+  // { "2026-10-05": { min: 465, bed: "22:30", wake: "06:15" } }  (date = the morning you woke)
+  const SLEEP_MANUAL_KEY = 'sleep_manual';
+  function sleepManual() { try { return JSON.parse(localStorage.getItem(SLEEP_MANUAL_KEY) || '{}') || {}; } catch (e) { return {}; } }
+  function saveSleepManual(m) { try { localStorage.setItem(SLEEP_MANUAL_KEY, JSON.stringify(m)); } catch (e) { toast('Could not save — storage may be full'); } }
+  // One night: Samsung Health wins when it has the night, otherwise your entry.
+  function sleepFor(date) {
+    const hd = healthData(), h = hd && hd.days && hd.days[date];
+    if (h && h.sleepMin) return { min: h.sleepMin, from: 'samsung', start: h.sleepStart, end: h.sleepEnd };
+    const m = sleepManual()[date];
+    if (m && m.min) return { min: m.min, from: 'me', bed: m.bed, wake: m.wake };
+    return null;
+  }
+  function clock12(hhmm) {
+    const [h, m] = String(hhmm || '').split(':').map(Number); if (isNaN(h)) return '';
+    return (h % 12 || 12) + ':' + String(m || 0).padStart(2, '0') + (h >= 12 ? 'pm' : 'am');
+  }
+  function minsBetween(bed, wake) {
+    const [a, b] = bed.split(':').map(Number), [c, d] = wake.split(':').map(Number);
+    let m = (c * 60 + d) - (a * 60 + b); if (m <= 0) m += 1440; return m;
+  }
+  function openSleepEntry(date) {
+    const all = sleepManual(), cur = all[date];
+    // pre-fill with this night's entry, or the most recent one, or 10:30pm-6:15am
+    const last = Object.keys(all).sort().reverse().map(k => all[k]).find(x => x && x.bed) || {};
+    const bed = (cur && cur.bed) || last.bed || '22:30', wake = (cur && cur.wake) || last.wake || '06:15';
+    const wd = parseYmd(date), nd = new Date(wd); nd.setDate(nd.getDate() - 1);
+    const dayName = (d) => d.toLocaleDateString('en-NZ', { weekday: 'long' });
+    const isToday = date === ymd(new Date());
+    openModal(isToday ? "Last night's sleep" : 'Sleep', `
+      <p class="sl-when">${dayName(nd)} night → ${dayName(wd)} morning</p>
+      <div class="sl-times">
+        <div class="field"><label for="slBed">Went to bed</label><input type="time" id="slBed" value="${bed}"></div>
+        <div class="field"><label for="slWake">Woke up</label><input type="time" id="slWake" value="${wake}"></div>
+      </div>
+      <div class="sl-total">Total <b id="slTot"></b></div>
+      <button class="btn primary" id="slSave" style="margin-top:16px;">Save</button>
+      ${cur ? '<div style="text-align:center;margin-top:8px;"><button class="btn danger-text" id="slDel">Remove entry</button></div>' : ''}`, () => {
+      const upd = () => { const b = $('slBed').value, w = $('slWake').value; $('slTot').textContent = (b && w) ? formatMins(minsBetween(b, w)) : '–'; };
+      $('slBed').addEventListener('input', upd); $('slWake').addEventListener('input', upd); upd();
+      $('slSave').addEventListener('click', () => {
+        const b = $('slBed').value, w = $('slWake').value;
+        if (!b || !w) { toast('Enter both times'); return; }
+        const m = sleepManual(); m[date] = { min: minsBetween(b, w), bed: b, wake: w }; saveSleepManual(m);
+        closeModal(); renderSleep(); toast('Sleep saved');
+      });
+      if (cur) $('slDel').addEventListener('click', () => {
+        const m = sleepManual(), was = m[date]; delete m[date]; saveSleepManual(m);
+        closeModal(); renderSleep();
+        toast('Entry removed', () => { const m2 = sleepManual(); m2[date] = was; saveSleepManual(m2); renderSleep(); });
+      });
+    });
+  }
   function renderSleep() {
     const el = $('sleepCard'); if (!el) return;
     refreshHealth(() => renderSleep());
-    const hd = healthData();
-    if (!hd || !hd.days) { el.innerHTML = ''; return; }
-    const days = healthLast7(), vals = days.map(k => (hd.days[k] || {}).sleepMin || 0);
-    if (!vals.some(Boolean)) { el.innerHTML = ''; return; }
-    const today = hd.days[days[6]] || {};
-    const logged = vals.filter(Boolean), avg = Math.round(logged.reduce((a, b) => a + b, 0) / logged.length);
+    const days = healthLast7(), nights = days.map(sleepFor);
+    const today = nights[6], logged = nights.filter(Boolean);
+    const avg = logged.length ? Math.round(logged.reduce((a, n) => a + n.min, 0) / logged.length) : 0;
+    const max = Math.max(1, ...logged.map(n => n.min));
+    const bars = '<div class="hbars sl-bars">' + nights.map((n, i) =>
+      `<i data-sleepday="${days[i]}" class="${n ? (n.from === 'me' ? 'me' : '') : 'none'}" style="height:${n ? Math.max(8, Math.round(n.min / max * 100)) : 0}%"></i>`).join('') + '</div>';
+    const times = !today ? '' : today.from === 'samsung'
+      ? (today.start ? fmtClock12(today.start) + ' – ' + fmtClock12(today.end) : '')
+      : clock12(today.bed) + ' – ' + clock12(today.wake);
+    const avgTxt = logged.length ? `7-night avg ${formatMins(avg)} · ${logged.length} night${logged.length === 1 ? '' : 's'}` : 'No nights recorded this week';
     el.innerHTML = `<div class="sleep-card">
-        <div class="sl-top"><span class="sl-k">Sleep</span><span class="sl-src">from Samsung Health</span></div>
-        <div class="sl-main"><b>${today.sleepMin ? formatMins(today.sleepMin) : '–'}</b> <span>${today.sleepMin ? 'last night' : 'nothing recorded last night'}</span></div>
-        <div class="sl-sub">${today.sleepStart ? fmtClock12(today.sleepStart) + ' – ' + fmtClock12(today.sleepEnd) + ' · ' : ''}7-night avg ${formatMins(avg)}</div>
-        ${healthBars(vals, 'var(--accent)', false)}
+        <div class="sl-top"><span class="sl-k">Sleep</span><span class="sl-src">${avgTxt}</span></div>
+        <div class="sl-main"><b>${today ? formatMins(today.min) : '–'}</b> <span>${today ? 'last night' : 'nothing recorded last night'}</span>${today ? `<span class="sl-pill">${today.from === 'me' ? 'entered' : 'Samsung'}</span>` : ''}</div>
+        ${times ? `<div class="sl-sub">${times}</div>` : ''}
+        ${bars}
+        ${today ? (today.from === 'me' ? '<button class="sl-edit" id="slEditBtn">Edit last night</button>' : '')
+                : '<button class="btn ghost" id="slLogBtn" style="margin-top:12px;">+ Log last night</button>'}
       </div>`;
+    const open = () => openSleepEntry(days[6]);
+    if ($('slLogBtn')) $('slLogBtn').addEventListener('click', open);
+    if ($('slEditBtn')) $('slEditBtn').addEventListener('click', open);
+    // tap an earlier night's bar to fill it in or change it (Samsung nights can't be edited)
+    el.querySelectorAll('[data-sleepday]').forEach(b => b.addEventListener('click', () => {
+      const n = sleepFor(b.dataset.sleepday);
+      if (n && n.from === 'samsung') { toast('That night came from Samsung Health'); return; }
+      openSleepEntry(b.dataset.sleepday);
+    }));
   }
   function renderHome() {
     renderSleep();
